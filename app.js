@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let provider, signer;
     const victionRPC = "https://rpc.viction.xyz"; // RPC URL của Viction
     const victionChainId = 88; // Chain ID của Viction
-    const victionSymbol = "VIC"; // Ký hiệu token của mạng Viction
     const frollSwapAddress = "0x9197BF0813e0727df4555E8cb43a0977F4a3A068";
     const frollTokenAddress = "0xB4d562A8f811CE7F134a1982992Bd153902290BC";
 
