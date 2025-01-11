@@ -1,0 +1,148 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+}
+
+.navbar .logo {
+    height: 40px;
+}
+
+.navbar .nav-links a {
+    text-decoration: none;
+    color: #fff;
+    margin-left: 15px;
+    font-size: 14px;
+}
+
+.navbar .nav-links a:hover {
+    text-decoration: underline;
+}
+
+/* Interface Containers */
+.interface {
+    max-width: 600px;
+    margin: 50px auto;
+    text-align: center;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #007bff;
+}
+
+p {
+    color: #555;
+}
+
+/* Buttons */
+.button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.button:active {
+    background-color: #004085;
+    transform: scale(0.95);
+}
+
+.button:disabled {
+    background-color: #d6d6d6;
+    cursor: not-allowed;
+}
+
+/* Swap Container */
+.swap-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.token-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 45%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f1f1f1;
+}
+
+.token-input img {
+    height: 24px;
+    width: 24px;
+}
+
+.token-input input {
+    flex-grow: 1;
+    border: none;
+    background: none;
+    font-size: 16px;
+    color: #333;
+}
+
+.token-input input:focus {
+    outline: none;
+}
+
+.swap-direction {
+    font-size: 24px;
+    color: #007bff;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.swap-direction:hover {
+    transform: rotate(180deg);
+}
+
+/* Swap Details */
+.swap-details {
+    text-align: left;
+    font-size: 14px;
+    color: #555;
+    margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .swap-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .token-input {
+        width: 100%;
+    }
+}
