@@ -5,8 +5,6 @@ body {
     padding: 0;
     background-color: #f9f9f9;
     color: #333;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
 }
 
 /* Navbar */
@@ -17,9 +15,6 @@ body {
     padding: 10px 20px;
     background-color: #007bff;
     color: #fff;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
 }
 
 .navbar .logo {
@@ -31,11 +26,10 @@ body {
     color: #fff;
     margin-left: 15px;
     font-size: 14px;
-    transition: color 0.2s ease-in-out;
 }
 
 .navbar .nav-links a:hover {
-    color: #ffdd57;
+    text-decoration: underline;
 }
 
 /* Interface Containers */
@@ -51,12 +45,10 @@ body {
 
 h1 {
     color: #007bff;
-    font-size: 1.8rem;
 }
 
 p {
     color: #555;
-    font-size: 1rem;
 }
 
 /* Buttons */
@@ -152,14 +144,5 @@ p {
 
     .token-input {
         width: 100%;
-    }
-
-    h1 {
-        font-size: 1.5rem;
-    }
-
-    .button {
-        font-size: 14px;
-        padding: 8px 16px;
     }
 }
