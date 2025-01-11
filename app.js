@@ -15,8 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Blockchain Config
     let provider, signer;
-    const victionRPC = "https://rpc.viction.xyz"; // RPC URL của Viction
-    const victionChainId = 88; // Chain ID của Viction
     const frollSwapAddress = "0x9197BF0813e0727df4555E8cb43a0977F4a3A068";
     const frollTokenAddress = "0xB4d562A8f811CE7F134a1982992Bd153902290BC";
 
@@ -76,23 +74,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('MetaMask is not installed. Please install MetaMask to use this application.');
                 return false;
             }
-            const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-            if (accounts.length === 0) {
-                alert('No wallet connected. Please connect your wallet.');
-                return false;
+
+            const isConnected = await ethereum.isConnected();
+            if (!isConnected) {
+                console.log("Wallet not connected. Requesting connection...");
+                await ethereum.request({ method: "eth_requestAccounts" });
             }
+
             provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = provider.getSigner();
             walletAddress = await signer.getAddress();
-
-            // Kiểm tra mạng đang kết nối
-            const network = await provider.getNetwork();
-            if (network.chainId !== victionChainId) {
-                alert(`Please connect to the Viction network (Chain ID: ${victionChainId}).`);
-                return false;
-            }
+            console.log("Wallet connected:", walletAddress);
             return true;
         } catch (error) {
+            console.error("Failed to connect wallet:", error);
             alert('Failed to connect wallet. Please try again.');
             return false;
         }
@@ -104,16 +99,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!connected) return;
 
         try {
+            const network = await provider.getNetwork();
+            console.log("Connected network Chain ID:", network.chainId);
+            if (network.chainId !== 88) {
+                alert("Please connect to the Viction network (Chain ID: 88).");
+                return;
+            }
+
+            // Initialize contracts
             frollSwapContract = new ethers.Contract(frollSwapAddress, frollSwapABI, signer);
             frollTokenContract = new ethers.Contract(frollTokenAddress, frollABI, signer);
+
             walletAddressDisplay.textContent = walletAddress;
             await updateBalances();
             showSwapInterface();
         } catch (error) {
+            console.error('Failed to initialize wallet:', error);
             alert(`Failed to initialize wallet: ${error.message}`);
         }
     });
 
+    // Disconnect Wallet
     disconnectWalletButton.addEventListener('click', () => {
         walletAddress = null;
         walletAddressDisplay.textContent = '';
@@ -133,21 +139,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateTokenDisplay() {
-        fromTokenInfo.textContent = `${fromToken}: ${balances[fromToken].toFixed(4)}`;
-        toTokenInfo.textContent = `${toToken}: ${balances[toToken].toFixed(4)}`;
+        // Hiển thị số dư với 18 chữ số thập phân
+        fromTokenInfo.textContent = `${fromToken}: ${balances[fromToken].toFixed(18)}`;
+        toTokenInfo.textContent = `${toToken}: ${balances[toToken].toFixed(18)}`;
     }
 
+    // Swap Direction
     swapDirectionButton.addEventListener('click', () => {
         [fromToken, toToken] = [toToken, fromToken];
         updateTokenDisplay();
         clearInputs();
     });
 
-    maxButton.addEventListener('click', () => {
+    // Max Button
+    maxButton.addEventListener('click', async () => {
+        const connected = await ensureWalletConnected();
+        if (!connected) return;
+
         fromAmountInput.value = balances[fromToken];
         calculateToAmount();
     });
 
+    // Calculate To Amount
     fromAmountInput.addEventListener('input', calculateToAmount);
     function calculateToAmount() {
         const fromAmount = parseFloat(fromAmountInput.value);
@@ -155,26 +168,50 @@ document.addEventListener('DOMContentLoaded', () => {
             toAmountInput.value = '';
             return;
         }
-        let netFromAmount, toAmount;
+
+        let netFromAmount;
+        let toAmount;
+
         if (fromToken === 'VIC') {
             netFromAmount = fromAmount - FEE;
-            toAmount = netFromAmount > 0 ? (netFromAmount / RATE).toFixed(4) : '0.0000';
+            toAmount = netFromAmount > 0 ? (netFromAmount / RATE).toFixed(18) : '0.000000000000000000';
         } else {
             netFromAmount = fromAmount * RATE;
-            toAmount = netFromAmount > FEE ? (netFromAmount - FEE).toFixed(4) : '0.0000';
+            toAmount = netFromAmount > FEE ? (netFromAmount - FEE).toFixed(18) : '0.000000000000000000';
         }
+
         toAmountInput.value = toAmount;
+        transactionFeeDisplay.textContent = `Transaction Fee: ${FEE} VIC`;
+        gasFeeDisplay.textContent = `Estimated Gas Fee: ~0.000029 VIC`;
     }
 
+    // Clear Inputs
+    function clearInputs() {
+        fromAmountInput.value = '';
+        toAmountInput.value = '';
+    }
+
+    // Swap Now
     swapNowButton.addEventListener('click', async () => {
         const connected = await ensureWalletConnected();
         if (!connected) return;
 
         const fromAmount = parseFloat(fromAmountInput.value);
+
         if (isNaN(fromAmount) || fromAmount <= 0) {
             alert('Please enter a valid amount to swap.');
             return;
         }
+
+        if (fromToken === 'VIC' && fromAmount < MIN_SWAP_AMOUNT_VIC) {
+            alert(`Minimum swap amount is ${MIN_SWAP_AMOUNT_VIC.toFixed(3)} VIC.`);
+            return;
+        }
+        if (fromToken === 'FROLL' && fromAmount < MIN_SWAP_AMOUNT_FROLL) {
+            alert(`Minimum swap amount is ${MIN_SWAP_AMOUNT_FROLL.toFixed(5)} FROLL.`);
+            return;
+        }
+
         try {
             if (fromToken === 'VIC') {
                 const value = ethers.utils.parseEther(fromAmount.toString());
@@ -191,10 +228,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             await updateBalances();
         } catch (error) {
+            console.error("Swap failed:", error);
             alert(`Swap failed: ${error.reason || error.message}`);
         }
     });
 
+    // Show/Hide Interfaces
     function showSwapInterface() {
         document.getElementById('swap-interface').style.display = 'block';
         document.getElementById('connect-interface').style.display = 'none';
@@ -205,5 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('connect-interface').style.display = 'block';
     }
 
+    // Initial State
     showConnectInterface();
 });
