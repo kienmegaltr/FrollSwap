@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrollSwap</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="navbar">
+        <img src="https://github.com/kienmegaltr/frollswap/blob/main/froll_48.png?raw=true" alt="FrollSwap Logo" class="logo">
+        <div class="nav-links">
+            <a href="https://t.me/FortuneRolls" target="_blank">Join Telegram</a>
+            <a href="https://x.com/FortuneRolls" target="_blank">Follow X</a>
+        </div>
+    </header>
+
+    <!-- Connect Wallet Interface -->
+    <div id="connect-interface" class="interface">
+        <h1>Welcome to FrollSwap!</h1>
+        <p>Swap your tokens easily, quickly, and securely.</p>
+        <button id="connect-wallet" class="button">Connect Wallet</button>
+    </div>
+
+    <!-- Swap Interface -->
+    <div id="swap-interface" class="interface" style="display: none;">
+        <header class="swap-header">
+            <div id="wallet-address" class="wallet-address"></div>
+            <button id="disconnect-wallet" class="button">Disconnect Wallet</button>
+        </header>
+        <h1>Swap</h1>
+        <div class="swap-container">
+            <!-- From Token -->
+            <div class="token-input">
+                <img id="from-token-logo" src="https://github.com/kienmegaltr/frollswap/blob/main/vic_24.png?raw=true" alt="From Token">
+                <div>
+                    <p id="from-token-info">VIC: 0.0000</p>
+                    <input type="number" id="from-amount" placeholder="0.0">
+                </div>
+                <button id="max-button" class="button">Max</button>
+            </div>
+
+            <!-- Swap Direction -->
+            <button id="swap-direction" class="swap-direction">↔️</button>
+
+            <!-- To Token -->
+            <div class="token-input">
+                <img id="to-token-logo" src="https://github.com/kienmegaltr/frollswap/blob/main/froll_24.png?raw=true" alt="To Token">
+                <div>
+                    <p id="to-token-info">FROLL: 0.0000</p>
+                    <input type="text" id="to-amount" placeholder="0.0" disabled>
+                </div>
+            </div>
+        </div>
+
+        <!-- Swap Details -->
+        <div class="swap-details">
+            <p id="transaction-fee">Transaction Fee: 0.01 VIC</p>
+            <p id="gas-fee">Estimated Gas Fee: ~0.000029 VIC</p>
+        </div>
+
+        <!-- Swap Button -->
+        <button id="swap-now" class="button">Swap Now</button>
+    </div>
+
+    <!-- Include Ethers.js -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <!-- Include App.js -->
+    <script src="app.js"></script>
+</body>
+</html>
