@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Blockchain Config
     let provider, signer;
+    const victionRPC = "https://rpc.viction.xyz"; // RPC URL của Viction
+    const victionChainId = 88; // Chain ID của Viction
+    const victionSymbol = "VIC"; // Ký hiệu token của mạng Viction
     const frollSwapAddress = "0x9197BF0813e0727df4555E8cb43a0977F4a3A068";
     const frollTokenAddress = "0xB4d562A8f811CE7F134a1982992Bd153902290BC";
 
@@ -82,6 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
             provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = provider.getSigner();
             walletAddress = await signer.getAddress();
+
+            // Kiểm tra mạng đang kết nối
+            const network = await provider.getNetwork();
+            if (network.chainId !== victionChainId) {
+                alert(`Please connect to the Viction network (Chain ID: ${victionChainId}).`);
+                return false;
+            }
             return true;
         } catch (error) {
             alert('Failed to connect wallet. Please try again.');
@@ -93,12 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
     connectWalletButton.addEventListener('click', async () => {
         const connected = await ensureWalletConnected();
         if (!connected) return;
+
         try {
-            const network = await provider.getNetwork();
-            if (network.chainId !== 88) {
-                alert("Please connect to the Viction network (Chain ID: 88).");
-                return;
-            }
             frollSwapContract = new ethers.Contract(frollSwapAddress, frollSwapABI, signer);
             frollTokenContract = new ethers.Contract(frollTokenAddress, frollABI, signer);
             walletAddressDisplay.textContent = walletAddress;
@@ -138,9 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInputs();
     });
 
-    maxButton.addEventListener('click', async () => {
-        const connected = await ensureWalletConnected();
-        if (!connected) return;
+    maxButton.addEventListener('click', () => {
         fromAmountInput.value = balances[fromToken];
         calculateToAmount();
     });
@@ -152,8 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             toAmountInput.value = '';
             return;
         }
-        let netFromAmount;
-        let toAmount;
+        let netFromAmount, toAmount;
         if (fromToken === 'VIC') {
             netFromAmount = fromAmount - FEE;
             toAmount = netFromAmount > 0 ? (netFromAmount / RATE).toFixed(4) : '0.0000';
@@ -167,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
     swapNowButton.addEventListener('click', async () => {
         const connected = await ensureWalletConnected();
         if (!connected) return;
+
         const fromAmount = parseFloat(fromAmountInput.value);
         if (isNaN(fromAmount) || fromAmount <= 0) {
             alert('Please enter a valid amount to swap.');
