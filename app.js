@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let fromToken = 'VIC';
     let toToken = 'FROLL';
 
+    // Ensure Wallet Connected
     async function ensureWalletConnected() {
         try {
             if (!window.ethereum) {
@@ -88,6 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Connect Wallet
     connectWalletButton.addEventListener('click', async () => {
         const connected = await ensureWalletConnected();
         if (!connected) return;
@@ -114,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showConnectInterface();
     });
 
+    // Update Balances
     async function updateBalances() {
         try {
             balances.VIC = parseFloat(ethers.utils.formatEther(await provider.getBalance(walletAddress)));
