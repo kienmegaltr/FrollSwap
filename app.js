@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const toAmountInput = document.getElementById('to-amount');
     const fromTokenInfo = document.getElementById('from-token-info');
     const toTokenInfo = document.getElementById('to-token-info');
+    const fromTokenLogo = document.getElementById('from-token-logo');
+    const toTokenLogo = document.getElementById('to-token-logo');
     const swapDirectionButton = document.getElementById('swap-direction');
     const maxButton = document.getElementById('max-button');
     const swapNowButton = document.getElementById('swap-now');
@@ -47,6 +49,16 @@ document.addEventListener('DOMContentLoaded', () => {
             "name": "balanceOf",
             "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
             "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                { "internalType": "address", "name": "spender", "type": "address" },
+                { "internalType": "uint256", "name": "amount", "type": "uint256" }
+            ],
+            "name": "approve",
+            "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+            "stateMutability": "nonpayable",
             "type": "function"
         }
     ];
@@ -146,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Swap Direction
     swapDirectionButton.addEventListener('click', () => {
         [fromToken, toToken] = [toToken, fromToken];
+        [fromTokenLogo.src, toTokenLogo.src] = [toTokenLogo.src, fromTokenLogo.src];
         updateTokenDisplay();
         clearInputs();
     });
@@ -155,6 +168,42 @@ document.addEventListener('DOMContentLoaded', () => {
         fromAmountInput.value = '';
         toAmountInput.value = '';
     }
+
+    // Swap Tokens
+    swapNowButton.addEventListener('click', async () => {
+        try {
+            const fromAmount = parseFloat(fromAmountInput.value);
+
+            if (isNaN(fromAmount) || fromAmount <= 0) {
+                alert('Please enter a valid amount to swap.');
+                return;
+            }
+
+            if (fromToken === 'VIC') {
+                const fromAmountInWei = ethers.utils.parseEther(fromAmount.toString());
+
+                const tx = await frollSwapContract.swapVicToFroll({
+                    value: fromAmountInWei
+                });
+                await tx.wait();
+                alert('Swap VIC to FROLL successful.');
+            } else {
+                const fromAmountInWei = ethers.utils.parseUnits(fromAmount.toString(), 18);
+
+                const approveTx = await frollTokenContract.approve(frollSwapAddress, fromAmountInWei);
+                await approveTx.wait();
+
+                const tx = await frollSwapContract.swapFrollToVic(fromAmountInWei);
+                await tx.wait();
+                alert('Swap FROLL to VIC successful.');
+            }
+
+            await updateBalances();
+        } catch (error) {
+            console.error("Swap failed:", error);
+            alert(`Swap failed: ${error.reason || error.message}`);
+        }
+    });
 
     // Connect Wallet
     connectWalletButton.addEventListener('click', async () => {
