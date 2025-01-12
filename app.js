@@ -223,6 +223,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Handle Disconnect Wallet button click
+    disconnectWalletButton.addEventListener('click', async () => {
+        try {
+            // Reset wallet-related variables
+            walletAddress = null;
+            balances = { VIC: 0, FROLL: 0 };
+            frollSwapContract = null;
+            frollTokenContract = null;
+
+            // Update UI
+            walletAddressDisplay.textContent = '';
+            clearInputs();
+            showConnectInterface();
+
+            alert('Wallet disconnected successfully.');
+        } catch (error) {
+            console.error('Error disconnecting wallet:', error);
+            alert('Failed to disconnect wallet. Please try again.');
+        }
+    });
+
     // Show/Hide Interfaces
     function showSwapInterface() {
         document.getElementById('swap-interface').style.display = 'block';
