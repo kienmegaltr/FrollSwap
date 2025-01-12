@@ -10,8 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const swapDirectionButton = document.getElementById('swap-direction');
     const maxButton = document.getElementById('max-button');
     const swapNowButton = document.getElementById('swap-now');
-    const transactionFeeDisplay = document.getElementById('transaction-fee');
-    const gasFeeDisplay = document.getElementById('gas-fee');
 
     // Blockchain Config
     let provider, signer;
@@ -42,21 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
             "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
             "stateMutability": "view",
             "type": "function"
-        },
-        {
-            "inputs": [
-                { "internalType": "address", "name": "spender", "type": "address" },
-                { "internalType": "uint256", "name": "amount", "type": "uint256" }
-            ],
-            "name": "approve",
-            "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-            "stateMutability": "nonpayable",
-            "type": "function"
         }
     ];
 
     let frollSwapContract, frollTokenContract;
     let walletAddress = null;
+    let balances = { VIC: 0, FROLL: 0 };
 
     // Ensure Wallet Connected
     async function ensureWalletConnected() {
@@ -80,6 +69,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Fetch Balances
+    async function updateBalances() {
+        try {
+            balances.VIC = parseFloat(ethers.utils.formatEther(await provider.getBalance(walletAddress)));
+            balances.FROLL = parseFloat(
+                ethers.utils.formatUnits(
+                    await frollTokenContract.balanceOf(walletAddress),
+                    18
+                )
+            );
+
+            updateTokenDisplay();
+        } catch (error) {
+            console.error('Error fetching balances:', error);
+        }
+    }
+
+    function updateTokenDisplay() {
+        fromTokenInfo.textContent = `VIC: ${balances.VIC.toFixed(4)}`;
+        toTokenInfo.textContent = `FROLL: ${balances.FROLL.toFixed(4)}`;
+    }
+
     // Connect Wallet
     connectWalletButton.addEventListener('click', async () => {
         const connected = await ensureWalletConnected();
@@ -90,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             frollTokenContract = new ethers.Contract(frollTokenAddress, frollABI, signer);
 
             walletAddressDisplay.textContent = walletAddress;
+            await updateBalances();
             showSwapInterface();
         } catch (error) {
             console.error('Failed to initialize wallet:', error);
@@ -101,6 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
     disconnectWalletButton.addEventListener('click', () => {
         walletAddress = null;
         walletAddressDisplay.textContent = '';
+        balances = { VIC: 0, FROLL: 0 };
+        updateTokenDisplay();
         showConnectInterface();
     });
 
@@ -114,41 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('swap-interface').style.display = 'none';
         document.getElementById('connect-interface').style.display = 'block';
     }
-
-    // Swap Tokens
-    swapNowButton.addEventListener('click', async () => {
-        try {
-            const fromAmount = parseFloat(fromAmountInput.value);
-
-            if (isNaN(fromAmount) || fromAmount <= 0) {
-                alert('Please enter a valid amount to swap.');
-                return;
-            }
-
-            if (fromTokenInfo.textContent.includes('VIC')) {
-                const tx = await frollSwapContract.swapVicToFroll({
-                    value: ethers.utils.parseEther(fromAmount.toString())
-                });
-                await tx.wait();
-                alert('Swap VIC to FROLL successful.');
-            } else {
-                const tx = await frollTokenContract.approve(
-                    frollSwapAddress,
-                    ethers.utils.parseUnits(fromAmount.toString(), 18)
-                );
-                await tx.wait();
-
-                const swapTx = await frollSwapContract.swapFrollToVic(
-                    ethers.utils.parseUnits(fromAmount.toString(), 18)
-                );
-                await swapTx.wait();
-                alert('Swap FROLL to VIC successful.');
-            }
-        } catch (error) {
-            console.error("Swap failed:", error);
-            alert(`Swap failed: ${error.reason || error.message}`);
-        }
-    });
 
     // Initialize Interface
     showConnectInterface();
