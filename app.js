@@ -10,11 +10,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const swapDirectionButton = document.getElementById('swap-direction');
     const maxButton = document.getElementById('max-button');
     const swapNowButton = document.getElementById('swap-now');
+    const transactionFeeDisplay = document.getElementById('transaction-fee');
+    const gasFeeDisplay = document.getElementById('gas-fee');
 
     // Blockchain Config
     let provider, signer;
     const frollSwapAddress = "0x9197BF0813e0727df4555E8cb43a0977F4a3A068";
     const frollTokenAddress = "0xB4d562A8f811CE7F134a1982992Bd153902290BC";
+
+    const RATE = 100; // 1 FROLL = 100 VIC
+    const FEE = 0.1; // 0.1 VIC swap fee
+    const GAS_FEE_ESTIMATE = 0.000029; // Estimated gas fee
+    const MIN_SWAP_AMOUNT_VIC = 0.011; // Minimum VIC
+    const MIN_SWAP_AMOUNT_FROLL = 0.00011; // Minimum FROLL
 
     const frollSwapABI = [
         {
@@ -46,6 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let frollSwapContract, frollTokenContract;
     let walletAddress = null;
     let balances = { VIC: 0, FROLL: 0 };
+    let fromToken = 'VIC';
+    let toToken = 'FROLL';
 
     // Ensure Wallet Connected
     async function ensureWalletConnected() {
@@ -87,8 +97,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateTokenDisplay() {
-        fromTokenInfo.textContent = `VIC: ${balances.VIC.toFixed(4)}`;
-        toTokenInfo.textContent = `FROLL: ${balances.FROLL.toFixed(4)}`;
+        fromTokenInfo.textContent = `${fromToken}: ${balances[fromToken].toFixed(18)}`;
+        toTokenInfo.textContent = `${toToken}: ${balances[toToken].toFixed(18)}`;
+    }
+
+    // Max Button
+    maxButton.addEventListener('click', async () => {
+        const connected = await ensureWalletConnected();
+        if (!connected) return;
+
+        fromAmountInput.value = balances[fromToken];
+        calculateToAmount();
+    });
+
+    // Calculate To Amount
+    fromAmountInput.addEventListener('input', calculateToAmount);
+    function calculateToAmount() {
+        const fromAmount = parseFloat(fromAmountInput.value);
+        if (isNaN(fromAmount) || fromAmount <= 0) {
+            toAmountInput.value = '';
+            return;
+        }
+
+        let netFromAmount;
+        let toAmount;
+
+        if (fromToken === 'VIC') {
+            if (fromAmount < MIN_SWAP_AMOUNT_VIC) {
+                alert(`Minimum swap amount is ${MIN_SWAP_AMOUNT_VIC} VIC.`);
+                return;
+            }
+            netFromAmount = fromAmount - FEE;
+            toAmount = netFromAmount > 0 ? (netFromAmount / RATE).toFixed(18) : '0.000000000000000000';
+        } else {
+            if (fromAmount < MIN_SWAP_AMOUNT_FROLL) {
+                alert(`Minimum swap amount is ${MIN_SWAP_AMOUNT_FROLL} FROLL.`);
+                return;
+            }
+            netFromAmount = fromAmount * RATE;
+            toAmount = netFromAmount > FEE ? (netFromAmount - FEE).toFixed(18) : '0.000000000000000000';
+        }
+
+        toAmountInput.value = toAmount;
+        transactionFeeDisplay.textContent = `Transaction Fee: ${FEE} VIC`;
+        gasFeeDisplay.textContent = `Estimated Gas Fee: ~${GAS_FEE_ESTIMATE} VIC`;
+    }
+
+    // Swap Direction
+    swapDirectionButton.addEventListener('click', () => {
+        [fromToken, toToken] = [toToken, fromToken];
+        updateTokenDisplay();
+        clearInputs();
+    });
+
+    // Clear Inputs
+    function clearInputs() {
+        fromAmountInput.value = '';
+        toAmountInput.value = '';
     }
 
     // Connect Wallet
@@ -107,15 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Failed to initialize wallet:', error);
             alert(`Failed to initialize wallet: ${error.message}`);
         }
-    });
-
-    // Disconnect Wallet
-    disconnectWalletButton.addEventListener('click', () => {
-        walletAddress = null;
-        walletAddressDisplay.textContent = '';
-        balances = { VIC: 0, FROLL: 0 };
-        updateTokenDisplay();
-        showConnectInterface();
     });
 
     // Show/Hide Interfaces
