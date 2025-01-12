@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const frollTokenAddress = "0xB4d562A8f811CE7F134a1982992Bd153902290BC";
 
     const RATE = 100; // 1 FROLL = 100 VIC
-    const FEE = 0.1; // 0.1 VIC swap fee
+    const FEE = 0.01; // 0.01 VIC swap fee
     const GAS_FEE_ESTIMATE = 0.000029; // Estimated gas fee
     const MIN_SWAP_AMOUNT_VIC = 0.011; // Minimum VIC
     const MIN_SWAP_AMOUNT_FROLL = 0.00011; // Minimum FROLL
