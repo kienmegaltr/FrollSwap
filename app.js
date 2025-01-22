@@ -3,16 +3,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const confirmPairButton = document.getElementById('confirm-pair');
     const connectWalletButton = document.getElementById('connect-wallet');
     const swapNowButton = document.getElementById('swap-now');
+    const fromAmountInput = document.getElementById('from-amount');
+    const toAmountInput = document.getElementById('to-amount');
     const walletAddressDisplay = document.getElementById('wallet-address');
     const fromTokenInfo = document.getElementById('from-token-info');
     const toTokenInfo = document.getElementById('to-token-info');
     const transactionFeeDisplay = document.getElementById('transaction-fee');
     const gasFeeDisplay = document.getElementById('gas-fee');
+    const maxButton = document.getElementById('max-button');
 
     let selectedPair = 'VIC';
     let networkConfig = {};
     let provider, signer, contract, tokenContract;
-    let isConnectingWallet = false; // Trạng thái để kiểm soát việc kết nối ví
 
     // Load network configurations
     async function loadNetworkConfig() {
@@ -33,15 +35,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     connectWalletButton.addEventListener('click', async () => {
-        // Kiểm tra nếu đang kết nối ví
-        if (isConnectingWallet) {
-            alert('Already connecting to wallet. Please wait.');
-            return;
-        }
-
-        isConnectingWallet = true; // Đánh dấu trạng thái kết nối
-        connectWalletButton.disabled = true; // Vô hiệu hóa nút "Connect Wallet"
-
         const pairConfig = networkConfig.pairs[selectedPair];
         try {
             if (!window.ethereum) throw new Error('MetaMask is not installed.');
@@ -93,10 +86,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             await updateBalances(pairConfig);
         } catch (error) {
             alert(`Failed to connect wallet: ${error.message}`);
-        } finally {
-            // Đặt lại trạng thái kết nối
-            isConnectingWallet = false;
-            connectWalletButton.disabled = false; // Kích hoạt lại nút "Connect Wallet"
         }
     });
 
@@ -119,6 +108,38 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Failed to fetch balances:', error);
         }
     }
+
+    function calculateSwap(toToken, fromAmount) {
+        const RATE = 100; // Example rate: 1 FROLL = 100 VIC
+        const fee = 0.01; // Example fee: 0.01 VIC
+
+        let netAmount = fromAmount - fee;
+        if (toToken === 'FROLL') {
+            return netAmount / RATE;
+        } else {
+            return netAmount * RATE;
+        }
+    }
+
+    fromAmountInput.addEventListener('input', () => {
+        const fromAmount = parseFloat(fromAmountInput.value);
+        if (isNaN(fromAmount) || fromAmount <= 0) {
+            toAmountInput.value = '';
+            return;
+        }
+
+        const toAmount = calculateSwap('FROLL', fromAmount);
+        toAmountInput.value = toAmount.toFixed(4);
+    });
+
+    maxButton.addEventListener('click', async () => {
+        const pairConfig = networkConfig.pairs[selectedPair];
+        const nativeBalance = ethers.utils.formatEther(await provider.getBalance(await signer.getAddress()));
+        fromAmountInput.value = parseFloat(nativeBalance).toFixed(4);
+
+        const toAmount = calculateSwap('FROLL', parseFloat(nativeBalance));
+        toAmountInput.value = toAmount.toFixed(4);
+    });
 
     swapNowButton.addEventListener('click', async () => {
         try {
