@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const transactionFeeDisplay = document.getElementById('transaction-fee');
     const gasFeeDisplay = document.getElementById('gas-fee');
 
-    let selectedPair = "VIC";
+    let selectedPair = "VIC"; // Default pair
     let networkConfig = {};
     let provider, signer, contract;
 
@@ -26,11 +26,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function init() {
         await loadNetworkConfig();
 
-        // Default to the first pair (VIC)
+        // Default to FROLL/VIC
         updateInterfaceForPair(selectedPair);
+        document.getElementById('pair-selection').style.display = 'block';
+        document.getElementById('network-selection').style.display = 'none';
+        document.getElementById('swap-interface').style.display = 'none';
     }
 
-    // Update interface based on selected pair
+    // Update interface for selected pair
     function updateInterfaceForPair(pair) {
         const pairConfig = networkConfig.pairs[pair];
         if (!pairConfig) {
@@ -38,7 +41,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Update token information
         fromTokenInfo.textContent = `From: ${pairConfig.symbol}`;
         toTokenInfo.textContent = `To: FROLL`;
         transactionFeeDisplay.textContent = `Transaction Fee: ~0.01 ${pairConfig.symbol}`;
@@ -71,21 +73,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Connect MetaMask
             await window.ethereum.request({
-                method: 'wallet_addEthereumChain',
-                params: [{
-                    chainId: `0x${pairConfig.chainId.toString(16)}`,
-                    rpcUrls: [pairConfig.rpcUrl],
-                    chainName: pairConfig.name,
-                    nativeCurrency: {
-                        name: pairConfig.symbol,
-                        symbol: pairConfig.symbol,
-                        decimals: 18
-                    },
-                    blockExplorerUrls: [pairConfig.blockExplorer],
-                }],
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: `0x${pairConfig.chainId.toString(16)}` }],
             });
 
-            // Get wallet address
             provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = provider.getSigner();
             const walletAddress = await signer.getAddress();
@@ -96,6 +87,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Move to Swap interface
             document.getElementById('network-selection').style.display = 'none';
             document.getElementById('swap-interface').style.display = 'block';
+
+            // Initialize contract
+            contract = new ethers.Contract(pairConfig.contractAddress, await fetch(pairConfig.abi).then(res => res.json()), signer);
         } catch (error) {
             console.error('Failed to connect wallet:', error);
             alert('Failed to connect wallet. Please try again.');
@@ -122,8 +116,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await tx.wait();
                 alert('Swap BNB to FROLL successful.');
             }
-
-            // Update balances or other UI elements as needed
         } catch (error) {
             console.error('Swap failed:', error);
             alert(`Swap failed: ${error.message}`);
