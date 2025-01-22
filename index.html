@@ -7,23 +7,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Header -->
-    <header class="navbar">
-        <img src="https://github.com/kienmegaltr/FrollSwap/blob/main/froll_48.png?raw=true" alt="FrollSwap Logo" class="logo">
-        <div class="nav-links">
-            <a href="https://t.me/FortuneRolls" target="_blank">Join Telegram</a>
-            <a href="https://x.com/FortuneRolls" target="_blank">Follow X</a>
-        </div>
-    </header>
-
-    <!-- Connect Wallet Interface -->
-    <div id="connect-interface" class="interface">
+    <!-- Network Selection -->
+    <div id="network-selection" class="interface">
         <h1>Welcome to FrollSwap!</h1>
-        <p>Swap your tokens easily, quickly, and securely.</p>
+        <p>Select a network to start swapping:</p>
         <select id="network-select">
-            <option value="vic" selected>VIC</option>
-            <option value="bnb">BNB</option>
-            <option value="eth">ETH</option>
+            <option value="VIC" selected>VIC Network (Default)</option>
+            <option value="BNB">BNB Smart Chain</option>
         </select>
         <button id="connect-wallet" class="button">Connect Wallet</button>
     </div>
@@ -34,6 +24,7 @@
             <div id="wallet-address" class="wallet-address"></div>
             <button id="disconnect-wallet" class="button">Disconnect Wallet</button>
         </header>
+
         <h1>Swap</h1>
         <div class="swap-container">
             <!-- From Token -->
@@ -61,8 +52,8 @@
 
         <!-- Swap Details -->
         <div class="swap-details">
-            <p id="transaction-fee">Transaction Fee: 0.01 VIC</p>
-            <p id="gas-fee">Estimated Gas Fee: ~0.000029 VIC</p>
+            <p id="transaction-fee">Transaction Fee: 0.01</p>
+            <p id="gas-fee">Estimated Gas Fee: ~0.000029</p>
         </div>
 
         <!-- Swap Button -->
