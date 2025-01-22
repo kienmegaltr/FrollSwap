@@ -84,7 +84,7 @@ p {
     justify-content: space-between;
     align-items: center;
     margin: 20px 0;
-    gap: 20px;
+    gap: 20px; /* Create spacing between the swap elements */
 }
 
 .token-input {
@@ -117,7 +117,7 @@ p {
 
 /* Adjust Max Button */
 .token-input .button {
-    margin-left: -5px;
+    margin-left: -5px; /* Adjust the placement of the Max button */
 }
 
 /* Swap Direction */
@@ -142,22 +142,11 @@ p {
     margin-top: 20px;
 }
 
-/* Dropdown */
-#network-select {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-    background: #fff;
-    margin-top: 10px;
-    width: 200px;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
     .swap-container {
         flex-direction: column;
-        gap: 10px;
+        gap: 10px; /* Smaller spacing for mobile */
     }
 
     .token-input {
