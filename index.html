@@ -20,6 +20,15 @@
     <div id="connect-interface" class="interface">
         <h1>Welcome to FrollSwap!</h1>
         <p>Swap your tokens easily, quickly, and securely.</p>
+
+        <!-- Network Selection -->
+        <div class="network-selection">
+            <label for="network-select">Select Network:</label>
+            <select id="network-select">
+                <!-- Options will be dynamically loaded from networkConfig.json -->
+            </select>
+        </div>
+
         <button id="connect-wallet" class="button">Connect Wallet</button>
     </div>
 
@@ -29,6 +38,7 @@
             <div id="wallet-address" class="wallet-address"></div>
             <button id="disconnect-wallet" class="button">Disconnect Wallet</button>
         </header>
+
         <h1>Swap</h1>
         <div class="swap-container">
             <!-- From Token -->
