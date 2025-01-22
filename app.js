@@ -3,8 +3,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const confirmPairButton = document.getElementById('confirm-pair');
     const connectWalletButton = document.getElementById('connect-wallet');
     const swapNowButton = document.getElementById('swap-now');
-    const fromAmountInput = document.getElementById('from-amount');
-    const toAmountInput = document.getElementById('to-amount');
     const walletAddressDisplay = document.getElementById('wallet-address');
     const fromTokenInfo = document.getElementById('from-token-info');
     const toTokenInfo = document.getElementById('to-token-info');
@@ -14,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedPair = 'VIC';
     let networkConfig = {};
     let provider, signer, contract, tokenContract;
+    let isConnectingWallet = false; // Trạng thái để kiểm soát việc kết nối ví
 
     // Load network configurations
     async function loadNetworkConfig() {
@@ -34,6 +33,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     connectWalletButton.addEventListener('click', async () => {
+        // Kiểm tra nếu đang kết nối ví
+        if (isConnectingWallet) {
+            alert('Already connecting to wallet. Please wait.');
+            return;
+        }
+
+        isConnectingWallet = true; // Đánh dấu trạng thái kết nối
+        connectWalletButton.disabled = true; // Vô hiệu hóa nút "Connect Wallet"
+
         const pairConfig = networkConfig.pairs[selectedPair];
         try {
             if (!window.ethereum) throw new Error('MetaMask is not installed.');
@@ -85,7 +93,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             await updateBalances(pairConfig);
         } catch (error) {
             alert(`Failed to connect wallet: ${error.message}`);
-            console.error('Error:', error);
+        } finally {
+            // Đặt lại trạng thái kết nối
+            isConnectingWallet = false;
+            connectWalletButton.disabled = false; // Kích hoạt lại nút "Connect Wallet"
         }
     });
 
