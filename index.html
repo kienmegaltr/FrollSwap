@@ -7,14 +7,22 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Network Selection -->
-    <div id="network-selection" class="interface">
+    <!-- Token Pair Selection -->
+    <div id="pair-selection" class="interface">
         <h1>Welcome to FrollSwap!</h1>
-        <p>Select a network to start swapping:</p>
-        <select id="network-select">
-            <option value="VIC" selected>VIC Network (Default)</option>
-            <option value="BNB">BNB Smart Chain</option>
+        <p>Select a token pair to start swapping:</p>
+        <select id="pair-select">
+            <option value="VIC" selected>FROLL/VIC</option>
+            <option value="BNB">FROLL/BNB</option>
+            <!-- Add more pairs dynamically from `networkConfig.json` -->
         </select>
+        <button id="confirm-pair" class="button">Confirm</button>
+    </div>
+
+    <!-- Network Selection -->
+    <div id="network-selection" class="interface" style="display: none;">
+        <h1>Select Network</h1>
+        <p>Connect your wallet to the selected network:</p>
         <button id="connect-wallet" class="button">Connect Wallet</button>
     </div>
 
@@ -29,9 +37,9 @@
         <div class="swap-container">
             <!-- From Token -->
             <div class="token-input">
-                <img id="from-token-logo" src="https://github.com/kienmegaltr/FrollSwap/blob/main/vic_24.png?raw=true" alt="From Token">
+                <img id="from-token-logo" src="https://github.com/kienmegaltr/FrollSwap/blob/main/froll_24.png?raw=true" alt="From Token">
                 <div>
-                    <p id="from-token-info">VIC: 0.0000</p>
+                    <p id="from-token-info">From: 0.0000</p>
                     <input type="number" id="from-amount" placeholder="0.0">
                 </div>
                 <button id="max-button" class="button">Max</button>
@@ -42,9 +50,9 @@
 
             <!-- To Token -->
             <div class="token-input">
-                <img id="to-token-logo" src="https://github.com/kienmegaltr/FrollSwap/blob/main/froll_24.png?raw=true" alt="To Token">
+                <img id="to-token-logo" src="" alt="To Token">
                 <div>
-                    <p id="to-token-info">FROLL: 0.0000</p>
+                    <p id="to-token-info">To: 0.0000</p>
                     <input type="text" id="to-amount" placeholder="0.0" disabled>
                 </div>
             </div>
@@ -52,8 +60,8 @@
 
         <!-- Swap Details -->
         <div class="swap-details">
-            <p id="transaction-fee">Transaction Fee: 0.01</p>
-            <p id="gas-fee">Estimated Gas Fee: ~0.000029</p>
+            <p id="transaction-fee">Transaction Fee: --</p>
+            <p id="gas-fee">Estimated Gas Fee: --</p>
         </div>
 
         <!-- Swap Button -->
