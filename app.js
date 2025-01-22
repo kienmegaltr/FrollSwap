@@ -1,78 +1,123 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const networkSelection = document.getElementById('network-select');
+    // DOM Elements
+    const pairSelect = document.getElementById('pair-select');
+    const confirmPairButton = document.getElementById('confirm-pair');
     const connectWalletButton = document.getElementById('connect-wallet');
-    const swapInterface = document.getElementById('swap-interface');
-    const networkSelectionInterface = document.getElementById('network-selection');
+    const swapNowButton = document.getElementById('swap-now');
+    const fromAmountInput = document.getElementById('from-amount');
+    const toAmountInput = document.getElementById('to-amount');
+    const fromTokenInfo = document.getElementById('from-token-info');
+    const toTokenInfo = document.getElementById('to-token-info');
+    const walletAddressDisplay = document.getElementById('wallet-address');
+    const transactionFeeDisplay = document.getElementById('transaction-fee');
+    const gasFeeDisplay = document.getElementById('gas-fee');
 
-    let selectedNetwork = "VIC";
+    let selectedPair = "VIC";
+    let networkConfig = {};
+    let provider, signer, contract;
 
-    const networkConfig = {
-        VIC: {
-            name: "VIC Network",
-            rpcUrl: "https://rpc.vicnetwork.com",
-            contractAddress: "0x9197BF0813e0727df4555E8cb43a0977F4a3A068",
-            tokenAddress: "0xB4d562A8f811CE7F134a1982992Bd153902290BC",
-            abi: VIC_ABI // Replace with the actual ABI
-        },
-        BNB: {
-            name: "BNB Smart Chain",
-            rpcUrl: "https://bsc-dataseed.binance.org/",
-            contractAddress: "0xC03217B3eb055D720e90a75fCfAA7577f22e52F9",
-            tokenAddress: "0x7783cBC17d43F936DA1C1D052E4a33a9FfF774c1",
-            abi: BNB_ABI // Replace with the actual ABI
+    // Load network configurations
+    async function loadNetworkConfig() {
+        const response = await fetch('networkConfig.json');
+        networkConfig = await response.json();
+    }
+
+    // Initialize application
+    async function init() {
+        await loadNetworkConfig();
+
+        // Default to the first pair (VIC)
+        updateInterfaceForPair(selectedPair);
+    }
+
+    // Update interface based on selected pair
+    function updateInterfaceForPair(pair) {
+        const pairConfig = networkConfig.pairs[pair];
+        if (!pairConfig) {
+            alert('Invalid token pair selected.');
+            return;
         }
-    };
 
-    // Handle network selection
-    networkSelection.addEventListener('change', (event) => {
-        selectedNetwork = event.target.value;
+        // Update token information
+        fromTokenInfo.textContent = `From: ${pairConfig.symbol}`;
+        toTokenInfo.textContent = `To: FROLL`;
+        transactionFeeDisplay.textContent = `Transaction Fee: ~0.01 ${pairConfig.symbol}`;
+        gasFeeDisplay.textContent = `Estimated Gas Fee: ~... ${pairConfig.symbol}`;
+    }
+
+    // Handle pair selection
+    confirmPairButton.addEventListener('click', () => {
+        selectedPair = pairSelect.value;
+        updateInterfaceForPair(selectedPair);
+
+        document.getElementById('pair-selection').style.display = 'none';
+        document.getElementById('network-selection').style.display = 'block';
     });
 
     // Connect Wallet
     connectWalletButton.addEventListener('click', async () => {
-        const network = networkConfig[selectedNetwork];
-        if (!network) {
-            alert('Invalid network selected!');
+        const pairConfig = networkConfig.pairs[selectedPair];
+        if (!pairConfig) {
+            alert('Invalid network configuration.');
             return;
         }
 
         try {
             if (!window.ethereum) {
-                alert('MetaMask not found. Please install MetaMask to use this application.');
+                alert('MetaMask is not installed. Please install MetaMask to use this application.');
                 return;
             }
 
             await window.ethereum.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
-                    chainId: `0x${network.chainId.toString(16)}`,
-                    rpcUrls: [network.rpcUrl],
-                    chainName: network.name,
+                    chainId: `0x${pairConfig.chainId.toString(16)}`,
+                    rpcUrls: [pairConfig.rpcUrl],
+                    chainName: pairConfig.name,
                 }],
             });
 
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
             const walletAddress = await signer.getAddress();
+            walletAddressDisplay.textContent = `Connected: ${walletAddress}`;
 
-            alert(`Connected to ${network.name} as ${walletAddress}`);
-            networkSelectionInterface.style.display = 'none';
-            swapInterface.style.display = 'block';
+            contract = new ethers.Contract(pairConfig.contractAddress, await fetch(pairConfig.abi).then(res => res.json()), signer);
 
-            const contract = new ethers.Contract(
-                network.contractAddress,
-                network.abi,
-                signer
-            );
-
-            // Initialize swap logic
-            initSwapFunctionality(contract, walletAddress, network);
+            document.getElementById('network-selection').style.display = 'none';
+            document.getElementById('swap-interface').style.display = 'block';
         } catch (error) {
             console.error('Failed to connect wallet:', error);
         }
     });
 
-    function initSwapFunctionality(contract, walletAddress, network) {
-        console.log(`Swap functionality initialized for ${network.name}`);
-    }
+    // Handle Swap
+    swapNowButton.addEventListener('click', async () => {
+        try {
+            const fromAmount = parseFloat(fromAmountInput.value);
+            if (isNaN(fromAmount) || fromAmount <= 0) {
+                alert('Please enter a valid amount to swap.');
+                return;
+            }
+
+            if (selectedPair === 'VIC') {
+                const fromAmountInWei = ethers.utils.parseEther(fromAmount.toString());
+                const tx = await contract.swapVicToFroll({ value: fromAmountInWei });
+                await tx.wait();
+                alert('Swap VIC to FROLL successful.');
+            } else if (selectedPair === 'BNB') {
+                const fromAmountInWei = ethers.utils.parseEther(fromAmount.toString());
+                const tx = await contract.swapBNBForFROLL({ value: fromAmountInWei });
+                await tx.wait();
+                alert('Swap BNB to FROLL successful.');
+            }
+
+            // Update balances or other UI elements as needed
+        } catch (error) {
+            console.error('Swap failed:', error);
+            alert(`Swap failed: ${error.message}`);
+        }
+    });
+
+    await init();
 });
