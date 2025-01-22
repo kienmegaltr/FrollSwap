@@ -34,8 +34,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             if (!window.ethereum) throw new Error('MetaMask is not installed.');
             await window.ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: `0x${pairConfig.chainId.toString(16)}` }],
+                method: 'eth_requestAccounts',
+            });
+
+            await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                    chainId: `0x${pairConfig.chainId.toString(16)}`,
+                    rpcUrls: [pairConfig.rpcUrl],
+                    chainName: pairConfig.name,
+                    nativeCurrency: {
+                        name: pairConfig.symbol,
+                        symbol: pairConfig.symbol,
+                        decimals: 18,
+                    },
+                    blockExplorerUrls: [pairConfig.blockExplorer],
+                }],
             });
 
             provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -43,11 +57,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const walletAddress = await signer.getAddress();
             walletAddressDisplay.textContent = `Connected: ${walletAddress}`;
 
-            // Load contract ABI
             const abiResponse = await fetch(pairConfig.abi);
             const abi = await abiResponse.json();
 
-            // Initialize contract
             contract = new ethers.Contract(pairConfig.contractAddress, abi, signer);
             document.getElementById('network-selection').style.display = 'none';
             document.getElementById('swap-interface').style.display = 'block';
