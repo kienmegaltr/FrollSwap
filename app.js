@@ -1,8 +1,9 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // DOM Elements
     const connectWalletButton = document.getElementById('connect-wallet');
     const disconnectWalletButton = document.getElementById('disconnect-wallet');
     const walletAddressDisplay = document.getElementById('wallet-address');
+    const networkSelect = document.getElementById('network-select');
     const fromAmountInput = document.getElementById('from-amount');
     const toAmountInput = document.getElementById('to-amount');
     const fromTokenInfo = document.getElementById('from-token-info');
@@ -15,109 +16,103 @@ document.addEventListener('DOMContentLoaded', () => {
     const transactionFeeDisplay = document.getElementById('transaction-fee');
     const gasFeeDisplay = document.getElementById('gas-fee');
 
-    // Blockchain Config
+    // Configuration Variables
     let provider, signer;
-    const frollSwapAddress = "0x9197BF0813e0727df4555E8cb43a0977F4a3A068";
-    const frollTokenAddress = "0xB4d562A8f811CE7F134a1982992Bd153902290BC";
-
-    const RATE = 100; // 1 FROLL = 100 VIC
-    const FEE = 0.01; // 0.01 VIC swap fee
-    const GAS_FEE_ESTIMATE = 0.000029; // Estimated gas fee
-    const MIN_SWAP_AMOUNT_VIC = 0.011; // Minimum VIC
-    const MIN_SWAP_AMOUNT_FROLL = 0.00011; // Minimum FROLL
-
-    const frollSwapABI = [
-        {
-            "inputs": [],
-            "name": "swapVicToFroll",
-            "outputs": [],
-            "stateMutability": "payable",
-            "type": "function"
-        },
-        {
-            "inputs": [{ "internalType": "uint256", "name": "frollAmount", "type": "uint256" }],
-            "name": "swapFrollToVic",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        }
-    ];
-
-    const frollABI = [
-        {
-            "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
-            "name": "balanceOf",
-            "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                { "internalType": "address", "name": "spender", "type": "address" },
-                { "internalType": "uint256", "name": "amount", "type": "uint256" }
-            ],
-            "name": "approve",
-            "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        }
-    ];
-
-    let frollSwapContract, frollTokenContract;
     let walletAddress = null;
-    let balances = { VIC: 0, FROLL: 0 };
-    let fromToken = 'VIC';
-    let toToken = 'FROLL';
+    let balances = { native: 0, froll: 0 };
+    let fromToken = 'native';
+    let toToken = 'froll';
+    let currentNetwork = null;
 
-    // Ensure Wallet Connected
-    async function ensureWalletConnected() {
-        try {
-            if (!window.ethereum) {
-                alert('MetaMask is not installed. Please install MetaMask to use this application.');
-                return false;
-            }
+    // Load network configurations
+    const networkConfig = await fetch('networkConfig.json').then(res => res.json());
+    let frollSwapContract = null;
+    let frollTokenContract = null;
 
-            await window.ethereum.request({ method: "eth_requestAccounts" });
+    // Update UI based on selected network
+    async function updateNetworkConfig(networkKey) {
+        currentNetwork = networkConfig[networkKey];
 
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
-            walletAddress = await signer.getAddress();
+        if (!currentNetwork) {
+            alert('Invalid network selected.');
+            return;
+        }
 
-            return true;
-        } catch (error) {
-            console.error("Failed to connect wallet:", error);
-            alert('Failed to connect wallet. Please try again.');
-            return false;
+        // Update Contract Instances
+        if (provider) {
+            frollSwapContract = new ethers.Contract(
+                currentNetwork.frollSwapAddress,
+                [
+                    {
+                        "inputs": [],
+                        "name": "swapNativeToFroll",
+                        "outputs": [],
+                        "stateMutability": "payable",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [{ "internalType": "uint256", "name": "frollAmount", "type": "uint256" }],
+                        "name": "swapFrollToNative",
+                        "outputs": [],
+                        "stateMutability": "nonpayable",
+                        "type": "function"
+                    }
+                ],
+                signer
+            );
+
+            frollTokenContract = new ethers.Contract(
+                currentNetwork.frollAddress,
+                [
+                    {
+                        "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
+                        "name": "balanceOf",
+                        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+                        "stateMutability": "view",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [
+                            { "internalType": "address", "name": "spender", "type": "address" },
+                            { "internalType": "uint256", "name": "amount", "type": "uint256" }
+                        ],
+                        "name": "approve",
+                        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+                        "stateMutability": "nonpayable",
+                        "type": "function"
+                    }
+                ],
+                signer
+            );
+
+            await updateBalances();
         }
     }
 
-    // Fetch Balances
+    // Update Balances
     async function updateBalances() {
         try {
-            balances.VIC = parseFloat(ethers.utils.formatEther(await provider.getBalance(walletAddress)));
-            balances.FROLL = parseFloat(
+            balances.native = parseFloat(ethers.utils.formatEther(await provider.getBalance(walletAddress)));
+            balances.froll = parseFloat(
                 ethers.utils.formatUnits(
                     await frollTokenContract.balanceOf(walletAddress),
                     18
                 )
             );
-
             updateTokenDisplay();
         } catch (error) {
-            console.error('Error fetching balances:', error);
+            console.error('Error updating balances:', error);
         }
     }
 
+    // Update Token Display
     function updateTokenDisplay() {
-        fromTokenInfo.textContent = `${fromToken}: ${balances[fromToken].toFixed(18)}`;
-        toTokenInfo.textContent = `${toToken}: ${balances[toToken].toFixed(18)}`;
+        fromTokenInfo.textContent = `${fromToken === 'native' ? currentNetwork.nativeToken : 'FROLL'}: ${balances[fromToken].toFixed(4)}`;
+        toTokenInfo.textContent = `${toToken === 'native' ? currentNetwork.nativeToken : 'FROLL'}: ${balances[toToken].toFixed(4)}`;
     }
 
     // Max Button
-    maxButton.addEventListener('click', async () => {
-        const connected = await ensureWalletConnected();
-        if (!connected) return;
-
+    maxButton.addEventListener('click', () => {
         fromAmountInput.value = balances[fromToken];
         calculateToAmount();
     });
@@ -130,131 +125,79 @@ document.addEventListener('DOMContentLoaded', () => {
             toAmountInput.value = '';
             return;
         }
-
-        let netFromAmount;
-        let toAmount;
-
-        if (fromToken === 'VIC') {
-            if (fromAmount < MIN_SWAP_AMOUNT_VIC) {
-                alert(`Minimum swap amount is ${MIN_SWAP_AMOUNT_VIC} VIC.`);
-                return;
-            }
-            netFromAmount = fromAmount - FEE;
-            toAmount = netFromAmount > 0 ? (netFromAmount / RATE).toFixed(18) : '0.000000000000000000';
-        } else {
-            if (fromAmount < MIN_SWAP_AMOUNT_FROLL) {
-                alert(`Minimum swap amount is ${MIN_SWAP_AMOUNT_FROLL} FROLL.`);
-                return;
-            }
-            netFromAmount = fromAmount * RATE;
-            toAmount = netFromAmount > FEE ? (netFromAmount - FEE).toFixed(18) : '0.000000000000000000';
-        }
-
-        toAmountInput.value = toAmount;
-        transactionFeeDisplay.textContent = `Transaction Fee: ${FEE} VIC`;
-        gasFeeDisplay.textContent = `Estimated Gas Fee: ~${GAS_FEE_ESTIMATE} VIC`;
-    }
-
-    // Swap Direction
-    swapDirectionButton.addEventListener('click', () => {
-        [fromToken, toToken] = [toToken, fromToken];
-        [fromTokenLogo.src, toTokenLogo.src] = [toTokenLogo.src, fromTokenLogo.src];
-        updateTokenDisplay();
-        clearInputs();
-    });
-
-    // Clear Inputs
-    function clearInputs() {
-        fromAmountInput.value = '';
-        toAmountInput.value = '';
+        toAmountInput.value = fromToken === 'native' ? fromAmount.toFixed(4) : fromAmount.toFixed(4);
     }
 
     // Swap Tokens
     swapNowButton.addEventListener('click', async () => {
+        const fromAmount = parseFloat(fromAmountInput.value);
+        if (isNaN(fromAmount) || fromAmount <= 0) {
+            alert('Please enter a valid amount.');
+            return;
+        }
+
         try {
-            const fromAmount = parseFloat(fromAmountInput.value);
-
-            if (isNaN(fromAmount) || fromAmount <= 0) {
-                alert('Please enter a valid amount to swap.');
-                return;
-            }
-
-            if (fromToken === 'VIC') {
-                const fromAmountInWei = ethers.utils.parseEther(fromAmount.toString());
-
-                const tx = await frollSwapContract.swapVicToFroll({
-                    value: fromAmountInWei
+            if (fromToken === 'native') {
+                const tx = await frollSwapContract.swapNativeToFroll({
+                    value: ethers.utils.parseEther(fromAmount.toString())
                 });
                 await tx.wait();
-                alert('Swap VIC to FROLL successful.');
             } else {
                 const fromAmountInWei = ethers.utils.parseUnits(fromAmount.toString(), 18);
-
-                const approveTx = await frollTokenContract.approve(frollSwapAddress, fromAmountInWei);
-                await approveTx.wait();
-
-                const tx = await frollSwapContract.swapFrollToVic(fromAmountInWei);
-                await tx.wait();
-                alert('Swap FROLL to VIC successful.');
+                const approvalTx = await frollTokenContract.approve(currentNetwork.frollSwapAddress, fromAmountInWei);
+                await approvalTx.wait();
+                const swapTx = await frollSwapContract.swapFrollToNative(fromAmountInWei);
+                await swapTx.wait();
             }
 
             await updateBalances();
+            alert('Swap successful!');
         } catch (error) {
-            console.error("Swap failed:", error);
-            alert(`Swap failed: ${error.reason || error.message}`);
+            console.error('Swap failed:', error);
+            alert(`Swap failed: ${error.message}`);
         }
     });
 
-    // Connect Wallet
+    // Handle Wallet Connection
     connectWalletButton.addEventListener('click', async () => {
-        const connected = await ensureWalletConnected();
-        if (!connected) return;
+        if (!window.ethereum) {
+            alert('Please install MetaMask to use this application.');
+            return;
+        }
 
         try {
-            frollSwapContract = new ethers.Contract(frollSwapAddress, frollSwapABI, signer);
-            frollTokenContract = new ethers.Contract(frollTokenAddress, frollABI, signer);
-
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
+            walletAddress = await signer.getAddress();
             walletAddressDisplay.textContent = walletAddress;
-            await updateBalances();
-            showSwapInterface();
+
+            // Initialize network
+            const selectedNetwork = networkSelect.value || 'vic';
+            await updateNetworkConfig(selectedNetwork);
+
+            document.getElementById('connect-interface').style.display = 'none';
+            document.getElementById('swap-interface').style.display = 'block';
         } catch (error) {
-            console.error('Failed to initialize wallet:', error);
-            alert(`Failed to initialize wallet: ${error.message}`);
+            console.error('Failed to connect wallet:', error);
+            alert('Failed to connect wallet.');
         }
     });
 
-    // Handle Disconnect Wallet button click
-    disconnectWalletButton.addEventListener('click', async () => {
-        try {
-            // Reset wallet-related variables
-            walletAddress = null;
-            balances = { VIC: 0, FROLL: 0 };
-            frollSwapContract = null;
-            frollTokenContract = null;
-
-            // Update UI
-            walletAddressDisplay.textContent = '';
-            clearInputs();
-            showConnectInterface();
-
-            alert('Wallet disconnected successfully.');
-        } catch (error) {
-            console.error('Error disconnecting wallet:', error);
-            alert('Failed to disconnect wallet. Please try again.');
-        }
-    });
-
-    // Show/Hide Interfaces
-    function showSwapInterface() {
-        document.getElementById('swap-interface').style.display = 'block';
-        document.getElementById('connect-interface').style.display = 'none';
-    }
-
-    function showConnectInterface() {
-        document.getElementById('swap-interface').style.display = 'none';
+    // Disconnect Wallet
+    disconnectWalletButton.addEventListener('click', () => {
+        provider = null;
+        signer = null;
+        walletAddress = null;
+        frollSwapContract = null;
+        frollTokenContract = null;
+        walletAddressDisplay.textContent = '';
         document.getElementById('connect-interface').style.display = 'block';
-    }
+        document.getElementById('swap-interface').style.display = 'none';
+    });
 
-    // Initialize Interface
-    showConnectInterface();
+    // Network Selection
+    networkSelect.addEventListener('change', async (e) => {
+        await updateNetworkConfig(e.target.value);
+    });
 });
