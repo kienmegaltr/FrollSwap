@@ -51,6 +51,22 @@ p {
     color: #555;
 }
 
+/* Dropdown */
+select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #f1f1f1;
+    margin-top: 10px;
+    width: 100%;
+}
+
+select:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
 /* Buttons */
 .button {
     background-color: #007bff;
