@@ -1,9 +1,8 @@
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const connectWalletButton = document.getElementById('connect-wallet');
     const disconnectWalletButton = document.getElementById('disconnect-wallet');
     const walletAddressDisplay = document.getElementById('wallet-address');
-    const networkSelect = document.getElementById('network-select');
     const fromAmountInput = document.getElementById('from-amount');
     const toAmountInput = document.getElementById('to-amount');
     const fromTokenInfo = document.getElementById('from-token-info');
@@ -15,189 +14,129 @@ document.addEventListener('DOMContentLoaded', async () => {
     const swapNowButton = document.getElementById('swap-now');
     const transactionFeeDisplay = document.getElementById('transaction-fee');
     const gasFeeDisplay = document.getElementById('gas-fee');
+    const networkSelect = document.getElementById('network-select');
 
-    // Configuration Variables
+    // Blockchain Config
     let provider, signer;
+    let selectedNetwork = "VIC"; // Default network
+
+    const networks = {
+        VIC: {
+            frollTokenAddress: "0xB4d562A8f811CE7F134a1982992Bd153902290BC",
+            swapContractAddress: "0x9197BF0813e0727df4555E8cb43a0977F4a3A068",
+            rpcUrl: "https://rpc.viction.xyz"
+        },
+        BNB: {
+            frollTokenAddress: "0x7783cBC17d43F936DA1C1D052E4a33a9FfF774c1",
+            swapContractAddress: "0xC03217B3eb055D720e90a75fCfAA7577f22e52F9",
+            rpcUrl: "https://bsc-dataseed.binance.org/"
+        }
+    };
+
+    const frollSwapABI = [
+        {
+            "inputs": [],
+            "name": "swapTokenToFroll",
+            "outputs": [],
+            "stateMutability": "payable",
+            "type": "function"
+        },
+        {
+            "inputs": [{ "internalType": "uint256", "name": "frollAmount", "type": "uint256" }],
+            "name": "swapFrollToToken",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ];
+
+    const frollABI = [
+        {
+            "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
+            "name": "balanceOf",
+            "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                { "internalType": "address", "name": "spender", "type": "address" },
+                { "internalType": "uint256", "name": "amount", "type": "uint256" }
+            ],
+            "name": "approve",
+            "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ];
+
+    let frollSwapContract, frollTokenContract;
     let walletAddress = null;
-    let balances = { native: 0, froll: 0 };
-    let fromToken = 'native';
-    let toToken = 'froll';
-    let currentNetwork = null;
+    let balances = { TOKEN: 0, FROLL: 0 };
+    let fromToken = 'TOKEN';
+    let toToken = 'FROLL';
 
-    // Load network configurations
-    const networkConfig = await fetch('networkConfig.json').then(res => res.json());
-    let frollSwapContract = null;
-    let frollTokenContract = null;
-
-    // Update UI based on selected network
-    async function updateNetworkConfig(networkKey) {
-        currentNetwork = networkConfig[networkKey];
-
-        if (!currentNetwork) {
-            alert('Invalid network selected.');
-            return;
-        }
-
-        // Update Contract Instances
-        if (provider) {
-            frollSwapContract = new ethers.Contract(
-                currentNetwork.frollSwapAddress,
-                [
-                    {
-                        "inputs": [],
-                        "name": "swapNativeToFroll",
-                        "outputs": [],
-                        "stateMutability": "payable",
-                        "type": "function"
-                    },
-                    {
-                        "inputs": [{ "internalType": "uint256", "name": "frollAmount", "type": "uint256" }],
-                        "name": "swapFrollToNative",
-                        "outputs": [],
-                        "stateMutability": "nonpayable",
-                        "type": "function"
-                    }
-                ],
-                signer
-            );
-
-            frollTokenContract = new ethers.Contract(
-                currentNetwork.frollAddress,
-                [
-                    {
-                        "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
-                        "name": "balanceOf",
-                        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-                        "stateMutability": "view",
-                        "type": "function"
-                    },
-                    {
-                        "inputs": [
-                            { "internalType": "address", "name": "spender", "type": "address" },
-                            { "internalType": "uint256", "name": "amount", "type": "uint256" }
-                        ],
-                        "name": "approve",
-                        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-                        "stateMutability": "nonpayable",
-                        "type": "function"
-                    }
-                ],
-                signer
-            );
-
-            await updateBalances();
-        }
+    async function updateNetworkConfig() {
+        const networkConfig = networks[selectedNetwork];
+        provider = new ethers.providers.JsonRpcProvider(networkConfig.rpcUrl);
+        signer = provider.getSigner();
+        frollSwapContract = new ethers.Contract(networkConfig.swapContractAddress, frollSwapABI, signer);
+        frollTokenContract = new ethers.Contract(networkConfig.frollTokenAddress, frollABI, signer);
+        if (walletAddress) await updateBalances();
     }
 
-    // Update Balances
-    async function updateBalances() {
+    async function ensureWalletConnected() {
         try {
-            balances.native = parseFloat(ethers.utils.formatEther(await provider.getBalance(walletAddress)));
-            balances.froll = parseFloat(
-                ethers.utils.formatUnits(
-                    await frollTokenContract.balanceOf(walletAddress),
-                    18
-                )
-            );
-            updateTokenDisplay();
-        } catch (error) {
-            console.error('Error updating balances:', error);
-        }
-    }
-
-    // Update Token Display
-    function updateTokenDisplay() {
-        fromTokenInfo.textContent = `${fromToken === 'native' ? currentNetwork.nativeToken : 'FROLL'}: ${balances[fromToken].toFixed(4)}`;
-        toTokenInfo.textContent = `${toToken === 'native' ? currentNetwork.nativeToken : 'FROLL'}: ${balances[toToken].toFixed(4)}`;
-    }
-
-    // Max Button
-    maxButton.addEventListener('click', () => {
-        fromAmountInput.value = balances[fromToken];
-        calculateToAmount();
-    });
-
-    // Calculate To Amount
-    fromAmountInput.addEventListener('input', calculateToAmount);
-    function calculateToAmount() {
-        const fromAmount = parseFloat(fromAmountInput.value);
-        if (isNaN(fromAmount) || fromAmount <= 0) {
-            toAmountInput.value = '';
-            return;
-        }
-        toAmountInput.value = fromToken === 'native' ? fromAmount.toFixed(4) : fromAmount.toFixed(4);
-    }
-
-    // Swap Tokens
-    swapNowButton.addEventListener('click', async () => {
-        const fromAmount = parseFloat(fromAmountInput.value);
-        if (isNaN(fromAmount) || fromAmount <= 0) {
-            alert('Please enter a valid amount.');
-            return;
-        }
-
-        try {
-            if (fromToken === 'native') {
-                const tx = await frollSwapContract.swapNativeToFroll({
-                    value: ethers.utils.parseEther(fromAmount.toString())
-                });
-                await tx.wait();
-            } else {
-                const fromAmountInWei = ethers.utils.parseUnits(fromAmount.toString(), 18);
-                const approvalTx = await frollTokenContract.approve(currentNetwork.frollSwapAddress, fromAmountInWei);
-                await approvalTx.wait();
-                const swapTx = await frollSwapContract.swapFrollToNative(fromAmountInWei);
-                await swapTx.wait();
+            if (!window.ethereum) {
+                alert('MetaMask is not installed. Please install MetaMask to use this application.');
+                return false;
             }
-
-            await updateBalances();
-            alert('Swap successful!');
-        } catch (error) {
-            console.error('Swap failed:', error);
-            alert(`Swap failed: ${error.message}`);
-        }
-    });
-
-    // Handle Wallet Connection
-    connectWalletButton.addEventListener('click', async () => {
-        if (!window.ethereum) {
-            alert('Please install MetaMask to use this application.');
-            return;
-        }
-
-        try {
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            await window.ethereum.request({ method: "eth_requestAccounts" });
             provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = provider.getSigner();
             walletAddress = await signer.getAddress();
-            walletAddressDisplay.textContent = walletAddress;
-
-            // Initialize network
-            const selectedNetwork = networkSelect.value || 'vic';
-            await updateNetworkConfig(selectedNetwork);
-
-            document.getElementById('connect-interface').style.display = 'none';
-            document.getElementById('swap-interface').style.display = 'block';
+            walletAddressDisplay.textContent = `Connected: ${walletAddress}`;
+            return true;
         } catch (error) {
-            console.error('Failed to connect wallet:', error);
-            alert('Failed to connect wallet.');
+            console.error("Failed to connect wallet:", error);
+            alert('Failed to connect wallet. Please try again.');
+            return false;
         }
+    }
+
+    async function updateBalances() {
+        try {
+            const networkConfig = networks[selectedNetwork];
+            balances.TOKEN = parseFloat(ethers.utils.formatEther(await provider.getBalance(walletAddress)));
+            balances.FROLL = parseFloat(
+                ethers.utils.formatUnits(await frollTokenContract.balanceOf(walletAddress), 18)
+            );
+            updateTokenDisplay();
+        } catch (error) {
+            console.error('Error fetching balances:', error);
+        }
+    }
+
+    function updateTokenDisplay() {
+        fromTokenInfo.textContent = `${fromToken}: ${balances[fromToken].toFixed(18)}`;
+        toTokenInfo.textContent = `${toToken}: ${balances[toToken].toFixed(18)}`;
+    }
+
+    networkSelect.addEventListener('change', async (event) => {
+        selectedNetwork = event.target.value;
+        await updateNetworkConfig();
     });
 
-    // Disconnect Wallet
+    connectWalletButton.addEventListener('click', async () => {
+        const connected = await ensureWalletConnected();
+        if (!connected) return;
+        await updateNetworkConfig();
+    });
+
     disconnectWalletButton.addEventListener('click', () => {
-        provider = null;
-        signer = null;
         walletAddress = null;
-        frollSwapContract = null;
-        frollTokenContract = null;
         walletAddressDisplay.textContent = '';
-        document.getElementById('connect-interface').style.display = 'block';
-        document.getElementById('swap-interface').style.display = 'none';
-    });
-
-    // Network Selection
-    networkSelect.addEventListener('change', async (e) => {
-        await updateNetworkConfig(e.target.value);
+        fromTokenInfo.textContent = '';
+        toTokenInfo.textContent = '';
     });
 });
