@@ -20,15 +20,11 @@
     <div id="connect-interface" class="interface">
         <h1>Welcome to FrollSwap!</h1>
         <p>Swap your tokens easily, quickly, and securely.</p>
-
-        <!-- Network Selection -->
-        <div class="network-selection">
-            <label for="network-select">Select Network:</label>
-            <select id="network-select">
-                <!-- Options will be dynamically loaded from networkConfig.json -->
-            </select>
-        </div>
-
+        <label for="network-select">Choose Network:</label>
+        <select id="network-select">
+            <option value="VIC" selected>VIC</option>
+            <option value="BNB">BNB</option>
+        </select>
         <button id="connect-wallet" class="button">Connect Wallet</button>
     </div>
 
@@ -38,14 +34,13 @@
             <div id="wallet-address" class="wallet-address"></div>
             <button id="disconnect-wallet" class="button">Disconnect Wallet</button>
         </header>
-
         <h1>Swap</h1>
         <div class="swap-container">
             <!-- From Token -->
             <div class="token-input">
                 <img id="from-token-logo" src="https://github.com/kienmegaltr/FrollSwap/blob/main/vic_24.png?raw=true" alt="From Token">
                 <div>
-                    <p id="from-token-info">VIC: 0.0000</p>
+                    <p id="from-token-info">TOKEN: 0.0000</p>
                     <input type="number" id="from-amount" placeholder="0.0">
                 </div>
                 <button id="max-button" class="button">Max</button>
@@ -66,8 +61,8 @@
 
         <!-- Swap Details -->
         <div class="swap-details">
-            <p id="transaction-fee">Transaction Fee: 0.01 VIC</p>
-            <p id="gas-fee">Estimated Gas Fee: ~0.000029 VIC</p>
+            <p id="transaction-fee">Transaction Fee: 0.00 TOKEN</p>
+            <p id="gas-fee">Estimated Gas Fee: ~0.000000 TOKEN</p>
         </div>
 
         <!-- Swap Button -->
