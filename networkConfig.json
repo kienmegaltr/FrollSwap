@@ -1,22 +1,24 @@
 {
     "networks": {
-        "vic": {
+        "VIC": {
             "chainId": 88,
+            "name": "Viction",
             "rpcUrl": "https://rpc.viction.xyz",
-            "tokenContractAddress": "0xB4d562A8f811CE7F134a1982992Bd153902290BC",
-            "swapContractAddress": "0x9197BF0813e0727df4555E8cb43a0977F4a3A068"
+            "contractAddress": "0x9197BF0813e0727df4555E8cb43a0977F4a3A068",
+            "tokenAddress": "0xB4d562A8f811CE7F134a1982992Bd153902290BC",
+            "blockExplorer": "https://vicscan.xyz",
+            "symbol": "VIC",
+            "abi": "frollVicAbi.json"
         },
-        "bnb": {
+        "BNB": {
             "chainId": 56,
+            "name": "BNB Smart Chain",
             "rpcUrl": "https://bsc-dataseed.binance.org/",
-            "tokenContractAddress": "0x7783cBC17d43F936DA1C1D052E4a33a9FfF774c1",
-            "swapContractAddress": "0xC03217B3eb055D720e90a75fCfAA7577f22e52F9"
-        },
-        "eth": {
-            "chainId": 1,
-            "rpcUrl": "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID",
-            "tokenContractAddress": "0xYourFrollTokenAddressOnETH",
-            "swapContractAddress": "0xYourSwapContractAddressOnETH"
+            "contractAddress": "0xC03217B3eb055D720e90a75fCfAA7577f22e52F9",
+            "tokenAddress": "0x7783cBC17d43F936DA1C1D052E4a33a9FfF774c1",
+            "blockExplorer": "https://bscscan.com",
+            "symbol": "BNB",
+            "abi": "frollBnbAbi.json"
         }
     }
 }
