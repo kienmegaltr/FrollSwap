@@ -3,8 +3,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const confirmPairButton = document.getElementById('confirm-pair');
     const connectWalletButton = document.getElementById('connect-wallet');
     const swapNowButton = document.getElementById('swap-now');
-    const fromAmountInput = document.getElementById('from-amount');
-    const toAmountInput = document.getElementById('to-amount');
     const walletAddressDisplay = document.getElementById('wallet-address');
 
     let selectedPair = 'VIC';
@@ -33,10 +31,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         const pairConfig = networkConfig.pairs[selectedPair];
         try {
             if (!window.ethereum) throw new Error('MetaMask is not installed.');
-            await window.ethereum.request({
+
+            // Request account access
+            const accounts = await window.ethereum.request({
                 method: 'eth_requestAccounts',
             });
 
+            if (!accounts || accounts.length === 0) {
+                throw new Error('No accounts found in MetaMask.');
+            }
+
+            // Switch or add network
             await window.ethereum.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
@@ -52,33 +57,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }],
             });
 
+            // Initialize provider and signer
             provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = provider.getSigner();
             const walletAddress = await signer.getAddress();
+
             walletAddressDisplay.textContent = `Connected: ${walletAddress}`;
 
+            // Load contract ABI
             const abiResponse = await fetch(pairConfig.abi);
             const abi = await abiResponse.json();
 
             contract = new ethers.Contract(pairConfig.contractAddress, abi, signer);
+
             document.getElementById('network-selection').style.display = 'none';
             document.getElementById('swap-interface').style.display = 'block';
         } catch (error) {
             alert(`Failed to connect wallet: ${error.message}`);
-        }
-    });
-
-    swapNowButton.addEventListener('click', async () => {
-        try {
-            const fromAmount = parseFloat(fromAmountInput.value);
-            if (isNaN(fromAmount) || fromAmount <= 0) throw new Error('Invalid amount.');
-
-            const fromAmountInWei = ethers.utils.parseEther(fromAmount.toString());
-            const tx = await contract.swapVicToFroll({ value: fromAmountInWei });
-            await tx.wait();
-            alert('Swap successful.');
-        } catch (error) {
-            alert(`Swap failed: ${error.message}`);
+            console.error('Error:', error);
         }
     });
 
