@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedPair = 'VIC';
     let networkConfig = {};
     let provider, signer, contract;
+    let isConnectingWallet = false; // Trạng thái kiểm tra kết nối ví
 
     // Load network configurations
     async function loadNetworkConfig() {
@@ -28,6 +29,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     connectWalletButton.addEventListener('click', async () => {
+        // Kiểm tra trạng thái đang kết nối ví
+        if (isConnectingWallet) {
+            alert('Already connecting to wallet. Please wait.');
+            return;
+        }
+
+        isConnectingWallet = true; // Đặt trạng thái đang kết nối
+        connectWalletButton.disabled = true; // Vô hiệu hóa nút
+
         const pairConfig = networkConfig.pairs[selectedPair];
         try {
             if (!window.ethereum) throw new Error('MetaMask is not installed.');
@@ -74,7 +84,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('swap-interface').style.display = 'block';
         } catch (error) {
             alert(`Failed to connect wallet: ${error.message}`);
-            console.error('Error:', error);
+        } finally {
+            isConnectingWallet = false; // Đặt trạng thái kết nối lại thành `false`
+            connectWalletButton.disabled = false; // Bật lại nút
         }
     });
 
