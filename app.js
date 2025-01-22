@@ -63,31 +63,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
+            // Check MetaMask
             if (!window.ethereum) {
                 alert('MetaMask is not installed. Please install MetaMask to use this application.');
                 return;
             }
 
+            // Connect MetaMask
             await window.ethereum.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
                     chainId: `0x${pairConfig.chainId.toString(16)}`,
                     rpcUrls: [pairConfig.rpcUrl],
                     chainName: pairConfig.name,
+                    nativeCurrency: {
+                        name: pairConfig.symbol,
+                        symbol: pairConfig.symbol,
+                        decimals: 18
+                    },
+                    blockExplorerUrls: [pairConfig.blockExplorer],
                 }],
             });
 
+            // Get wallet address
             provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = provider.getSigner();
             const walletAddress = await signer.getAddress();
+
             walletAddressDisplay.textContent = `Connected: ${walletAddress}`;
+            alert(`Wallet connected to ${pairConfig.name}`);
 
-            contract = new ethers.Contract(pairConfig.contractAddress, await fetch(pairConfig.abi).then(res => res.json()), signer);
-
+            // Move to Swap interface
             document.getElementById('network-selection').style.display = 'none';
             document.getElementById('swap-interface').style.display = 'block';
         } catch (error) {
             console.error('Failed to connect wallet:', error);
+            alert('Failed to connect wallet. Please try again.');
         }
     });
 
