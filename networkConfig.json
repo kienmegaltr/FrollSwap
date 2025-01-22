@@ -1,0 +1,18 @@
+{
+  "networks": {
+    "VIC": {
+      "chainId": 88,
+      "rpcUrl": "https://rpc.viction.xyz",
+      "frollTokenAddress": "0xB4d562A8f811CE7F134a1982992Bd153902290BC",
+      "nativeToken": "VIC",
+      "swapContractAddress": "0x9197BF0813e0727df4555E8cb43a0977F4a3A068"
+    },
+    "BNB": {
+      "chainId": 56,
+      "rpcUrl": "https://bsc-dataseed.binance.org/",
+      "frollTokenAddress": "0x7783cBC17d43F936DA1C1D052E4a33a9FfF774c1",
+      "nativeToken": "BNB",
+      "swapContractAddress": "0xC03217B3eb055D720e90a75fCfAA7577f22e52F9"
+    }
+  }
+}
