@@ -142,6 +142,17 @@ p {
     margin-top: 20px;
 }
 
+/* Dropdown */
+#network-select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    background: #fff;
+    margin-top: 10px;
+    width: 200px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .swap-container {
@@ -152,25 +163,4 @@ p {
     .token-input {
         width: 100%;
     }
-}
-
-/* Network Selection */
-.network-selection {
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.network-selection label {
-    font-size: 14px;
-    color: #555;
-    margin-right: 10px;
-}
-
-.network-selection select {
-    padding: 5px 10px;
-    font-size: 14px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    outline: none;
-    background-color: #fff;
 }
