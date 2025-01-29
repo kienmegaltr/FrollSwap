@@ -1,21 +1,3 @@
-/* Logo Loading Effect */
-.logo {
-    height: 40px;
-    animation: fadeIn 1s ease-in-out;
-}
-
-/* Keyframes for fade-in effect */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
 /* General Styles */
 body {
     font-family: Arial, sans-serif;
@@ -35,14 +17,10 @@ body {
     color: #fff;
 }
 
-/* Price Display in Navbar */
-.nav-info {
-    font-size: 14px;
-    font-weight: bold;
-    color: #ffffff; /* Màu chữ trắng */
+.navbar .logo {
+    height: 40px;
 }
 
-/* Navbar Links */
 .navbar .nav-links a {
     text-decoration: none;
     color: #fff;
@@ -53,6 +31,7 @@ body {
 .navbar .nav-links a:hover {
     text-decoration: underline;
 }
+
 /* Interface Containers */
 .interface {
     max-width: 600px;
@@ -98,6 +77,7 @@ p {
     background-color: #d6d6d6;
     cursor: not-allowed;
 }
+
 /* Swap Container */
 .swap-container {
     display: flex;
@@ -153,6 +133,7 @@ p {
 .swap-direction:hover {
     transform: rotate(180deg);
 }
+
 /* Swap Details */
 .swap-details {
     text-align: left;
@@ -171,11 +152,4 @@ p {
     .token-input {
         width: 100%;
     }
-}
-
-/* Price Text Styling */
-.price-text {
-    font-size: 14px;
-    font-weight: bold;
-    color: #ffffff; /* Đảm bảo giá FROLL luôn hiển thị màu trắng */
 }
