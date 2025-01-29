@@ -39,6 +39,7 @@ body {
 .nav-info {
     font-size: 14px;
     font-weight: bold;
+    color: #ffffff; /* Màu chữ trắng */
 }
 
 /* Navbar Links */
@@ -52,7 +53,6 @@ body {
 .navbar .nav-links a:hover {
     text-decoration: underline;
 }
-
 /* Interface Containers */
 .interface {
     max-width: 600px;
@@ -98,7 +98,6 @@ p {
     background-color: #d6d6d6;
     cursor: not-allowed;
 }
-
 /* Swap Container */
 .swap-container {
     display: flex;
@@ -154,7 +153,6 @@ p {
 .swap-direction:hover {
     transform: rotate(180deg);
 }
-
 /* Swap Details */
 .swap-details {
     text-align: left;
@@ -173,4 +171,11 @@ p {
     .token-input {
         width: 100%;
     }
+}
+
+/* Price Text Styling */
+.price-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff; /* Đảm bảo giá FROLL luôn hiển thị màu trắng */
 }
