@@ -1,10 +1,21 @@
-/* Logo Loading Effect */
+/* Favicon Optimization */
+html {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Logo Styling */
 .logo {
     height: 40px;
+    display: block;
+    max-width: 100%;
     animation: fadeIn 1s ease-in-out;
 }
 
-/* Keyframes for fade-in effect */
+/* Keyframes for Fade-in Effect */
 @keyframes fadeIn {
     from {
         opacity: 0;
