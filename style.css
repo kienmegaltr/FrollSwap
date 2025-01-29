@@ -35,10 +35,13 @@ body {
     color: #fff;
 }
 
-.navbar .logo {
-    height: 40px;
+/* Price Display in Navbar */
+.nav-info {
+    font-size: 14px;
+    font-weight: bold;
 }
 
+/* Navbar Links */
 .navbar .nav-links a {
     text-decoration: none;
     color: #fff;
