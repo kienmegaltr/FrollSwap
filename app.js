@@ -1,5 +1,45 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // DOM Elements
+    const frollPriceDisplay = document.getElementById('froll-price');
+    
+    // API Config
+    const COINMARKETCAP_API_KEY = "d5c3ea8b-11ac-4580-8772-bb6e451d0b52";
+    const VIC_TO_USD_API_URL = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=VIC";
+    
+    // Constants
+    const FROLL_TO_VIC_RATE = 100; // 1 FROLL = 100 VIC
+
+    // Fetch VIC Price from CoinMarketCap
+    async function fetchVicPrice() {
+        try {
+            const response = await fetch(VIC_TO_USD_API_URL, {
+                headers: { "X-CMC_PRO_API_KEY": COINMARKETCAP_API_KEY }
+            });
+            const data = await response.json();
+            const vicPrice = data.data.VIC.quote.USD.price;
+            return vicPrice;
+        } catch (error) {
+            console.error("Error fetching VIC price:", error);
+            return null;
+        }
+    }
+
+    // Update FROLL Price in USD
+    async function updateFrollPrice() {
+        const vicPrice = await fetchVicPrice();
+        if (vicPrice) {
+            const frollPriceInUSD = FROLL_TO_VIC_RATE * vicPrice;
+            frollPriceDisplay.textContent = `1 FROLL = ${frollPriceInUSD.toFixed(4)} USD`;
+        } else {
+            frollPriceDisplay.textContent = "1 FROLL = ? USD";
+        }
+    }
+
+    // Initial Fetch and Update Price Every 60 Seconds
+    await updateFrollPrice();
+    setInterval(updateFrollPrice, 60000);
+});
+    // DOM Elements for Wallet
     const connectWalletButton = document.getElementById('connect-wallet');
     const disconnectWalletButton = document.getElementById('disconnect-wallet');
     const walletAddressDisplay = document.getElementById('wallet-address');
@@ -112,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fromTokenInfo.textContent = `${fromToken}: ${balances[fromToken].toFixed(18)}`;
         toTokenInfo.textContent = `${toToken}: ${balances[toToken].toFixed(18)}`;
     }
-
     // Max Button
     maxButton.addEventListener('click', async () => {
         const connected = await ensureWalletConnected();
@@ -168,7 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fromAmountInput.value = '';
         toAmountInput.value = '';
     }
-
     // Swap Tokens
     swapNowButton.addEventListener('click', async () => {
         try {
@@ -222,7 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Failed to initialize wallet: ${error.message}`);
         }
     });
-
     // Handle Disconnect Wallet button click
     disconnectWalletButton.addEventListener('click', async () => {
         try {
