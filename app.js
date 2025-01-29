@@ -1,42 +1,36 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // DOM Elements
     const frollPriceDisplay = document.getElementById('froll-price');
-    
+
     // API Config
-    const COINMARKETCAP_API_KEY = "d5c3ea8b-11ac-4580-8772-bb6e451d0b52";
-    const VIC_TO_USD_API_URL = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=VIC";
-    
-    // Constants
+    const BINANCE_API_URL = "https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT";
     const FROLL_TO_VIC_RATE = 100; // 1 FROLL = 100 VIC
 
-    // Fetch VIC Price from CoinMarketCap
-    async function fetchVicPrice() {
+    // Fetch VIC Price from Binance
+    async function fetchVicPriceFromBinance() {
         try {
-            const response = await fetch(VIC_TO_USD_API_URL, {
-                headers: { "X-CMC_PRO_API_KEY": COINMARKETCAP_API_KEY }
-            });
+            const response = await fetch(BINANCE_API_URL);
             const data = await response.json();
-            const vicPrice = data.data.VIC.quote.USD.price;
-            return vicPrice;
+            return parseFloat(data.price); // Chuyển đổi thành số
         } catch (error) {
-            console.error("Error fetching VIC price:", error);
+            console.error("Lỗi khi lấy giá VIC từ Binance:", error);
             return null;
         }
     }
 
     // Update FROLL Price in USD
     async function updateFrollPrice() {
-        const vicPrice = await fetchVicPrice();
+        const vicPrice = await fetchVicPriceFromBinance();
         if (vicPrice) {
             const frollPriceInUSD = FROLL_TO_VIC_RATE * vicPrice;
             frollPriceDisplay.textContent = `1 FROLL = ${frollPriceInUSD.toFixed(4)} USD`;
         } else {
-            frollPriceDisplay.textContent = "1 FROLL = ? USD";
+            frollPriceDisplay.textContent = "Loading price...";
         }
     }
 
     // Initial Fetch and Update Price Every 60 Seconds
-    await updateFrollPrice();
+    updateFrollPrice();
     setInterval(updateFrollPrice, 60000);
 });
     // DOM Elements for Wallet
@@ -254,6 +248,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             walletAddressDisplay.textContent = walletAddress;
             await updateBalances();
+            await updateFrollPrice(); // Cập nhật giá FROLL sau khi kết nối ví
             showSwapInterface();
         } catch (error) {
             console.error('Failed to initialize wallet:', error);
@@ -273,6 +268,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             walletAddressDisplay.textContent = '';
             clearInputs();
             showConnectInterface();
+
+            // Khi ngắt kết nối, đặt lại giá FROLL thành "Loading price..."
+            frollPriceDisplay.textContent = "Loading price...";
 
             alert('Wallet disconnected successfully.');
         } catch (error) {
