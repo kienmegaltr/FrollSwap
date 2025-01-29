@@ -1,39 +1,5 @@
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
-    const frollPriceDisplay = document.getElementById('froll-price');
-
-    // API Config
-    const BINANCE_API_URL = "https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT";
-    const FROLL_TO_VIC_RATE = 100; // 1 FROLL = 100 VIC
-
-    // Fetch VIC Price from Binance
-    async function fetchVicPriceFromBinance() {
-        try {
-            const response = await fetch(BINANCE_API_URL);
-            const data = await response.json();
-            return parseFloat(data.price); // Chuyển đổi thành số
-        } catch (error) {
-            console.error("Lỗi khi lấy giá VIC từ Binance:", error);
-            return null;
-        }
-    }
-
-    // Update FROLL Price in USD
-    async function updateFrollPrice() {
-        const vicPrice = await fetchVicPriceFromBinance();
-        if (vicPrice) {
-            const frollPriceInUSD = FROLL_TO_VIC_RATE * vicPrice;
-            frollPriceDisplay.textContent = `1 FROLL = ${frollPriceInUSD.toFixed(4)} USD`;
-        } else {
-            frollPriceDisplay.textContent = "Loading price...";
-        }
-    }
-
-    // Initial Fetch and Update Price Every 60 Seconds
-    updateFrollPrice();
-    setInterval(updateFrollPrice, 60000);
-});
-    // DOM Elements for Wallet
     const connectWalletButton = document.getElementById('connect-wallet');
     const disconnectWalletButton = document.getElementById('disconnect-wallet');
     const walletAddressDisplay = document.getElementById('wallet-address');
@@ -146,6 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         fromTokenInfo.textContent = `${fromToken}: ${balances[fromToken].toFixed(18)}`;
         toTokenInfo.textContent = `${toToken}: ${balances[toToken].toFixed(18)}`;
     }
+
     // Max Button
     maxButton.addEventListener('click', async () => {
         const connected = await ensureWalletConnected();
@@ -201,6 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         fromAmountInput.value = '';
         toAmountInput.value = '';
     }
+
     // Swap Tokens
     swapNowButton.addEventListener('click', async () => {
         try {
@@ -248,13 +216,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             walletAddressDisplay.textContent = walletAddress;
             await updateBalances();
-            await updateFrollPrice(); // Cập nhật giá FROLL sau khi kết nối ví
             showSwapInterface();
         } catch (error) {
             console.error('Failed to initialize wallet:', error);
             alert(`Failed to initialize wallet: ${error.message}`);
         }
     });
+
     // Handle Disconnect Wallet button click
     disconnectWalletButton.addEventListener('click', async () => {
         try {
@@ -268,9 +236,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             walletAddressDisplay.textContent = '';
             clearInputs();
             showConnectInterface();
-
-            // Khi ngắt kết nối, đặt lại giá FROLL thành "Loading price..."
-            frollPriceDisplay.textContent = "Loading price...";
 
             alert('Wallet disconnected successfully.');
         } catch (error) {
