@@ -44,6 +44,24 @@ body {
     padding: 10px 20px;
     background-color: #007bff;
     color: #fff;
+    position: relative;
+}
+
+/* Giá FROLL hiển thị trên thanh điều hướng */
+#froll-price {
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    margin-left: 15px;
+    white-space: nowrap;
+}
+
+/* Đảm bảo giá hiển thị đúng trên màn hình nhỏ */
+@media (max-width: 768px) {
+    #froll-price {
+        font-size: 14px;
+        margin-left: 10px;
+    }
 }
 
 .navbar .logo {
