@@ -61,6 +61,13 @@ body {
     text-decoration: underline;
 }
 
+/* Hiển thị giá FROLL */
+.price-display {
+    font-weight: bold;
+    color: white;
+    margin-left: 15px;
+}
+
 /* Interface Containers */
 .interface {
     max-width: 600px;
