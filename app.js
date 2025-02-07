@@ -36,6 +36,25 @@ document.querySelector('.navbar').appendChild(priceDisplay);
     const GAS_FEE_ESTIMATE = 0.000029; // Estimated gas fee
     const MIN_SWAP_AMOUNT_VIC = 0.011; // Minimum VIC
     const MIN_SWAP_AMOUNT_FROLL = 0.00011; // Minimum FROLL
+   
+    // Fetch giá FROLL theo USD từ API
+async function fetchFrollPrice() {
+    try {
+        const response = await fetch("http://api.lottery.vin/price");
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        const data = await response.json();
+        if (data.price) {
+            priceDisplay.textContent = `1 FROLL = ${parseFloat(data.price).toFixed(4)} USD`;
+        } else {
+            priceDisplay.textContent = "Price unavailable";
+        }
+    } catch (error) {
+        console.error("Error fetching FROLL price:", error);
+        priceDisplay.textContent = "Price error";
+    }
+}
+
 
     const frollSwapABI = [
         {
