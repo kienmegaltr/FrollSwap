@@ -52,13 +52,13 @@ async function fetchFrollPrice() {
     } catch (error) {
         console.error("Error fetching FROLL price:", error);
         priceDisplay.textContent = "Price error";
-        // Gọi API ngay khi tải trang & cập nhật mỗi 10 giây
-fetchFrollPrice();
-setInterval(fetchFrollPrice, 10000);
-
+       
     }
 }
 
+    // Gọi API ngay khi tải trang & cập nhật mỗi 10 giây
+fetchFrollPrice();
+setInterval(fetchFrollPrice, 10000);
 
     const frollSwapABI = [
         {
