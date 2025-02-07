@@ -55,8 +55,7 @@ async function fetchFrollPrice() {
        
     }
 }
-
-    // Gọi API ngay khi tải trang & cập nhật mỗi 10 giây
+// Gọi API ngay khi tải trang & cập nhật mỗi 10 giây
 fetchFrollPrice();
 setInterval(fetchFrollPrice, 10000);
 
