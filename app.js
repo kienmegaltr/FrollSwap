@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gọi API ngay khi tải trang & cập nhật mỗi 10 giây
     fetchFrollPrice();
     setInterval(fetchFrollPrice, 10000);
-});
+
     const frollSwapABI = [
         {
             "inputs": [],
@@ -140,29 +140,13 @@ document.addEventListener('DOMContentLoaded', () => {
         fromTokenInfo.textContent = `${fromToken}: ${balances[fromToken].toFixed(18)}`;
         toTokenInfo.textContent = `${toToken}: ${balances[toToken].toFixed(18)}`;
     }
+
     maxButton.addEventListener('click', async () => {
         const connected = await ensureWalletConnected();
         if (!connected) return;
         fromAmountInput.value = balances[fromToken];
         calculateToAmount();
     });
-
-    fromAmountInput.addEventListener('input', calculateToAmount);
-    function calculateToAmount() {
-        const fromAmount = parseFloat(fromAmountInput.value);
-        if (isNaN(fromAmount) || fromAmount <= 0) {
-            toAmountInput.value = '';
-            return;
-        }
-
-        let toAmount = fromToken === 'VIC'
-            ? ((fromAmount - FEE) / RATE).toFixed(18)
-            : ((fromAmount * RATE) - FEE).toFixed(18);
-
-        toAmountInput.value = toAmount;
-        transactionFeeDisplay.textContent = `Transaction Fee: ${FEE} VIC`;
-        gasFeeDisplay.textContent = `Estimated Gas Fee: ~${GAS_FEE_ESTIMATE} VIC`;
-    }
 
     swapDirectionButton.addEventListener('click', () => {
         [fromToken, toToken] = [toToken, fromToken];
