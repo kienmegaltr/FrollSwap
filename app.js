@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const swapNowButton = document.getElementById('swap-now');
     const transactionFeeDisplay = document.getElementById('transaction-fee');
     const gasFeeDisplay = document.getElementById('gas-fee');
-    const priceDisplay = document.getElementById('froll-price'); // Thêm DOM cho giá FROLL
+    const priceDisplay = document.getElementById('froll-price'); // Hiển thị giá FROLL trên thanh điều hướng
 
     // Blockchain Config
     let provider, signer;
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gọi API ngay khi tải trang & cập nhật mỗi 10 giây
     fetchFrollPrice();
     setInterval(fetchFrollPrice, 10000);
-
+});
     const frollSwapABI = [
         {
             "inputs": [],
@@ -137,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fromTokenInfo.textContent = `${fromToken}: ${balances[fromToken].toFixed(18)}`;
         toTokenInfo.textContent = `${toToken}: ${balances[toToken].toFixed(18)}`;
     }
-
     maxButton.addEventListener('click', async () => {
         const connected = await ensureWalletConnected();
         if (!connected) return;
