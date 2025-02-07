@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
+    const priceDisplay = document.getElementById('froll-price'); // Phần hiển thị giá trên thanh điều hướng
     const connectWalletButton = document.getElementById('connect-wallet');
     const disconnectWalletButton = document.getElementById('disconnect-wallet');
     const walletAddressDisplay = document.getElementById('wallet-address');
@@ -25,6 +26,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const GAS_FEE_ESTIMATE = 0.000029; // Estimated gas fee
     const MIN_SWAP_AMOUNT_VIC = 0.011; // Minimum VIC
     const MIN_SWAP_AMOUNT_FROLL = 0.00011; // Minimum FROLL
+
+    // Fetch giá FROLL theo USD từ API
+    async function fetchFrollPrice() {
+        try {
+            priceDisplay.textContent = "Loading price..."; // Hiển thị tạm thời khi chưa có giá
+            const response = await fetch('http://api.lottery.vin/price');
+            const data = await response.json();
+
+            if (data.price) {
+                priceDisplay.textContent = `1 FROLL = ${parseFloat(data.price).toFixed(4)} USD`;
+            } else {
+                priceDisplay.textContent = "Price unavailable";
+            }
+        } catch (error) {
+            console.error("Error fetching FROLL price:", error);
+            priceDisplay.textContent = "Price error";
+        }
+    }
+
+    // Cập nhật giá mỗi 10 giây để đảm bảo luôn hiển thị giá mới nhất
+    setInterval(fetchFrollPrice, 10000);
+    fetchFrollPrice(); // Gọi ngay khi trang tải xong
 
     const frollSwapABI = [
         {
@@ -69,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let fromToken = 'VIC';
     let toToken = 'FROLL';
 
-    // Ensure Wallet Connected
     async function ensureWalletConnected() {
         try {
             if (!window.ethereum) {
@@ -91,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Fetch Balances
     async function updateBalances() {
         try {
             balances.VIC = parseFloat(ethers.utils.formatEther(await provider.getBalance(walletAddress)));
@@ -101,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     18
                 )
             );
-
             updateTokenDisplay();
         } catch (error) {
             console.error('Error fetching balances:', error);
@@ -113,16 +133,13 @@ document.addEventListener('DOMContentLoaded', () => {
         toTokenInfo.textContent = `${toToken}: ${balances[toToken].toFixed(18)}`;
     }
 
-    // Max Button
     maxButton.addEventListener('click', async () => {
         const connected = await ensureWalletConnected();
         if (!connected) return;
-
         fromAmountInput.value = balances[fromToken];
         calculateToAmount();
     });
 
-    // Calculate To Amount
     fromAmountInput.addEventListener('input', calculateToAmount);
     function calculateToAmount() {
         const fromAmount = parseFloat(fromAmountInput.value);
@@ -131,73 +148,43 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        let netFromAmount;
-        let toAmount;
-
-        if (fromToken === 'VIC') {
-            if (fromAmount < MIN_SWAP_AMOUNT_VIC) {
-                alert(`Minimum swap amount is ${MIN_SWAP_AMOUNT_VIC} VIC.`);
-                return;
-            }
-            netFromAmount = fromAmount - FEE;
-            toAmount = netFromAmount > 0 ? (netFromAmount / RATE).toFixed(18) : '0.000000000000000000';
-        } else {
-            if (fromAmount < MIN_SWAP_AMOUNT_FROLL) {
-                alert(`Minimum swap amount is ${MIN_SWAP_AMOUNT_FROLL} FROLL.`);
-                return;
-            }
-            netFromAmount = fromAmount * RATE;
-            toAmount = netFromAmount > FEE ? (netFromAmount - FEE).toFixed(18) : '0.000000000000000000';
-        }
+        let toAmount = fromToken === 'VIC'
+            ? ((fromAmount - FEE) / RATE).toFixed(18)
+            : ((fromAmount * RATE) - FEE).toFixed(18);
 
         toAmountInput.value = toAmount;
         transactionFeeDisplay.textContent = `Transaction Fee: ${FEE} VIC`;
         gasFeeDisplay.textContent = `Estimated Gas Fee: ~${GAS_FEE_ESTIMATE} VIC`;
     }
 
-    // Swap Direction
     swapDirectionButton.addEventListener('click', () => {
         [fromToken, toToken] = [toToken, fromToken];
         [fromTokenLogo.src, toTokenLogo.src] = [toTokenLogo.src, fromTokenLogo.src];
         updateTokenDisplay();
-        clearInputs();
-    });
-
-    // Clear Inputs
-    function clearInputs() {
         fromAmountInput.value = '';
         toAmountInput.value = '';
-    }
+    });
 
-    // Swap Tokens
     swapNowButton.addEventListener('click', async () => {
         try {
             const fromAmount = parseFloat(fromAmountInput.value);
-
             if (isNaN(fromAmount) || fromAmount <= 0) {
                 alert('Please enter a valid amount to swap.');
                 return;
             }
 
             if (fromToken === 'VIC') {
-                const fromAmountInWei = ethers.utils.parseEther(fromAmount.toString());
-
                 const tx = await frollSwapContract.swapVicToFroll({
-                    value: fromAmountInWei
+                    value: ethers.utils.parseEther(fromAmount.toString())
                 });
                 await tx.wait();
                 alert('Swap VIC to FROLL successful.');
             } else {
-                const fromAmountInWei = ethers.utils.parseUnits(fromAmount.toString(), 18);
-
-                const approveTx = await frollTokenContract.approve(frollSwapAddress, fromAmountInWei);
-                await approveTx.wait();
-
-                const tx = await frollSwapContract.swapFrollToVic(fromAmountInWei);
-                await tx.wait();
+                const amountInWei = ethers.utils.parseUnits(fromAmount.toString(), 18);
+                await (await frollTokenContract.approve(frollSwapAddress, amountInWei)).wait();
+                await (await frollSwapContract.swapFrollToVic(amountInWei)).wait();
                 alert('Swap FROLL to VIC successful.');
             }
-
             await updateBalances();
         } catch (error) {
             console.error("Swap failed:", error);
@@ -205,56 +192,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Connect Wallet
     connectWalletButton.addEventListener('click', async () => {
-        const connected = await ensureWalletConnected();
-        if (!connected) return;
-
-        try {
+        if (await ensureWalletConnected()) {
             frollSwapContract = new ethers.Contract(frollSwapAddress, frollSwapABI, signer);
             frollTokenContract = new ethers.Contract(frollTokenAddress, frollABI, signer);
-
             walletAddressDisplay.textContent = walletAddress;
             await updateBalances();
-            showSwapInterface();
-        } catch (error) {
-            console.error('Failed to initialize wallet:', error);
-            alert(`Failed to initialize wallet: ${error.message}`);
         }
     });
 
-    // Handle Disconnect Wallet button click
-    disconnectWalletButton.addEventListener('click', async () => {
-        try {
-            // Reset wallet-related variables
-            walletAddress = null;
-            balances = { VIC: 0, FROLL: 0 };
-            frollSwapContract = null;
-            frollTokenContract = null;
-
-            // Update UI
-            walletAddressDisplay.textContent = '';
-            clearInputs();
-            showConnectInterface();
-
-            alert('Wallet disconnected successfully.');
-        } catch (error) {
-            console.error('Error disconnecting wallet:', error);
-            alert('Failed to disconnect wallet. Please try again.');
-        }
+    disconnectWalletButton.addEventListener('click', () => {
+        walletAddress = null;
+        walletAddressDisplay.textContent = '';
+        alert('Wallet disconnected successfully.');
     });
-
-    // Show/Hide Interfaces
-    function showSwapInterface() {
-        document.getElementById('swap-interface').style.display = 'block';
-        document.getElementById('connect-interface').style.display = 'none';
-    }
-
-    function showConnectInterface() {
-        document.getElementById('swap-interface').style.display = 'none';
-        document.getElementById('connect-interface').style.display = 'block';
-    }
-
-    // Initialize Interface
-    showConnectInterface();
 });
