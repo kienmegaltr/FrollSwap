@@ -14,7 +14,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const swapNowButton = document.getElementById('swap-now');
     const transactionFeeDisplay = document.getElementById('transaction-fee');
     const gasFeeDisplay = document.getElementById('gas-fee');
-    const priceDisplay = document.getElementById('froll-price'); // Hiển thị giá FROLL trên thanh điều hướng
+    const priceDisplay = document.createElement('div'); // Thêm DOM để hiển thị giá FROLL
+
+    // Chèn vào thanh điều hướng
+    priceDisplay.id = "froll-price";
+    priceDisplay.style.fontWeight = "bold";
+    priceDisplay.style.color = "white";
+    priceDisplay.style.marginLeft = "15px";
+    priceDisplay.textContent = "Loading price...";
+    document.querySelector('.navbar').appendChild(priceDisplay);
 
     // Blockchain Config
     let provider, signer;
@@ -30,15 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch giá FROLL theo USD từ API
     async function fetchFrollPrice() {
         try {
-            priceDisplay.textContent = "Loading price...";
             const response = await fetch("http://api.lottery.vin/price");
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
             const data = await response.json();
-
             if (data.price) {
                 priceDisplay.textContent = `1 FROLL = ${parseFloat(data.price).toFixed(4)} USD`;
             } else {
