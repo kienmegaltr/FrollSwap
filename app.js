@@ -14,19 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const swapNowButton = document.getElementById('swap-now');
     const transactionFeeDisplay = document.getElementById('transaction-fee');
     const gasFeeDisplay = document.getElementById('gas-fee');
-    const priceDisplay = document.createElement('div'); // Tạo phần tử DOM hiển thị giá FROLL
 
-// Chèn vào thanh điều hướng
-priceDisplay.id = "froll-price";
-priceDisplay.style.fontWeight = "bold";
-priceDisplay.style.color = "white";
-priceDisplay.style.marginLeft = "15px";
-priceDisplay.textContent = "Loading price...";
-
-// Chèn phần tử vào thanh điều hướng
-document.querySelector('.navbar').appendChild(priceDisplay);
-
-        // Blockchain Config
+    // Blockchain Config
     let provider, signer;
     const frollSwapAddress = "0x9197BF0813e0727df4555E8cb43a0977F4a3A068";
     const frollTokenAddress = "0xB4d562A8f811CE7F134a1982992Bd153902290BC";
@@ -36,28 +25,6 @@ document.querySelector('.navbar').appendChild(priceDisplay);
     const GAS_FEE_ESTIMATE = 0.000029; // Estimated gas fee
     const MIN_SWAP_AMOUNT_VIC = 0.011; // Minimum VIC
     const MIN_SWAP_AMOUNT_FROLL = 0.00011; // Minimum FROLL
-   
-    // Fetch giá FROLL theo USD từ API
-async function fetchFrollPrice() {
-    try {
-        const response = await fetch("http://api.lottery.vin/price");
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-        const data = await response.json();
-        if (data.price) {
-            priceDisplay.textContent = `1 FROLL = ${parseFloat(data.price).toFixed(4)} USD`;
-        } else {
-            priceDisplay.textContent = "Price unavailable";
-        }
-    } catch (error) {
-        console.error("Error fetching FROLL price:", error);
-        priceDisplay.textContent = "Price error";
-       
-    }
-}
-// Gọi API ngay khi tải trang & cập nhật mỗi 10 giây
-fetchFrollPrice();
-setInterval(fetchFrollPrice, 10000);
 
     const frollSwapABI = [
         {
