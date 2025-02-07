@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
-    const priceDisplay = document.getElementById('froll-price'); // Phần hiển thị giá trên thanh điều hướng
+    const priceDisplay = document.getElementById('froll-price'); // Hiển thị giá FROLL trên thanh điều hướng
     const connectWalletButton = document.getElementById('connect-wallet');
     const disconnectWalletButton = document.getElementById('disconnect-wallet');
     const walletAddressDisplay = document.getElementById('wallet-address');
@@ -30,8 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch giá FROLL theo USD từ API
     async function fetchFrollPrice() {
         try {
-            priceDisplay.textContent = "Loading price..."; // Hiển thị tạm thời khi chưa có giá
-            const response = await fetch('http://api.lottery.vin/price');
+            priceDisplay.textContent = "Loading price..."; // Hiển thị ban đầu
+            const response = await fetch("http://api.lottery.vin/price");
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
             const data = await response.json();
 
             if (data.price) {
@@ -45,9 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Cập nhật giá mỗi 10 giây để đảm bảo luôn hiển thị giá mới nhất
+    // Gọi API ngay khi tải trang & cập nhật mỗi 10 giây
+    fetchFrollPrice();
     setInterval(fetchFrollPrice, 10000);
-    fetchFrollPrice(); // Gọi ngay khi trang tải xong
 
     const frollSwapABI = [
         {
