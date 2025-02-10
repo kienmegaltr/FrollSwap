@@ -286,3 +286,14 @@ p {
         text-align: center;
     }
 }
+/* Make "Lottery.vin (Coming Soon!)" Clickable */
+.froll-platforms li:last-child strong {
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+.froll-platforms li:last-child strong:hover {
+    color: #0056b3;
+}
