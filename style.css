@@ -184,13 +184,13 @@ p {
 }
 /* FROLL Info Section */
 .froll-info {
-    max-width: 600px; /* Đồng bộ chiều rộng */
+    max-width: 600px;
     margin: 20px auto 0;
     text-align: center;
-    background: rgba(255, 255, 255, 0.8); /* Nền trắng trong suốt */
+    background: rgba(255, 255, 255, 0.8);
     padding: 20px;
     border-radius: 10px;
-    color: #333; /* Màu chữ trung tính, dễ đọc */
+    color: #333;
     font-size: 16px;
     line-height: 1.5;
     font-weight: 500;
@@ -213,34 +213,6 @@ p {
     font-weight: 600;
 }
 
-/* Links in FROLL Section */
-.froll-info a {
-    color: #007bff;
-    font-weight: bold;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.froll-info a:hover {
-    color: #0056b3;
-    text-decoration: underline;
-}
-
-/* Platforms List */
-.froll-platforms ul {
-    list-style-type: none;
-    padding: 0;
-    text-align: left;
-    margin: 0 auto;
-    max-width: 500px;
-}
-
-.froll-platforms li {
-    margin: 8px 0;
-    font-size: 15px;
-    font-weight: 500;
-}
-
 /* Social Links */
 .froll-socials {
     margin-top: 10px;
@@ -251,8 +223,8 @@ p {
 }
 
 .froll-socials a {
-    background: #007bff;
-    color: white;
+    background: none;
+    color: #007bff;
     padding: 8px 14px;
     border-radius: 5px;
     text-decoration: none;
@@ -262,38 +234,14 @@ p {
 }
 
 .froll-socials a:hover {
-    background: #0056b3;
+    background: #007bff;
+    color: white;
 }
 
-/* Responsive Optimization */
+/* Responsive */
 @media (max-width: 768px) {
     .froll-info {
         padding: 15px;
         font-size: 15px;
     }
-
-    .froll-platforms ul {
-        max-width: 100%;
-    }
-
-    .froll-socials {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .froll-socials a {
-        width: 80%;
-        text-align: center;
-    }
-}
-/* Make "Lottery.vin (Coming Soon!)" Clickable */
-.froll-platforms li:last-child strong {
-    cursor: pointer;
-    color: #007bff;
-    text-decoration: underline;
-    transition: color 0.3s ease;
-}
-
-.froll-platforms li:last-child strong:hover {
-    color: #0056b3;
 }
