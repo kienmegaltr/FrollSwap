@@ -184,22 +184,24 @@ p {
 }
 /* FROLL Info Section */
 .froll-info {
+    max-width: 600px; /* Đồng bộ chiều rộng */
+    margin: 20px auto 0;
     text-align: center;
-    margin-top: 20px;
-    padding: 15px;
-    background: #1a1a2e;
+    background: rgba(255, 255, 255, 0.8); /* Nền trắng trong suốt */
+    padding: 20px;
     border-radius: 10px;
-    color: white;
+    color: #333; /* Màu chữ trung tính, dễ đọc */
     font-size: 16px;
     line-height: 1.5;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    font-weight: 500;
 }
 
 /* Title Centered */
 .froll-info h2 {
     text-align: center;
-    font-size: 20px;
-    color: #ffcc00;
+    font-size: 22px;
+    font-weight: bold;
+    color: #007bff;
 }
 
 /* Subtitle */
@@ -207,16 +209,20 @@ p {
     text-align: center;
     font-size: 18px;
     margin-bottom: 10px;
+    color: #444;
+    font-weight: 600;
 }
 
 /* Links in FROLL Section */
 .froll-info a {
-    color: #ffcc00;
+    color: #007bff;
     font-weight: bold;
     text-decoration: none;
+    transition: color 0.3s ease;
 }
 
 .froll-info a:hover {
+    color: #0056b3;
     text-decoration: underline;
 }
 
@@ -232,6 +238,7 @@ p {
 .froll-platforms li {
     margin: 8px 0;
     font-size: 15px;
+    font-weight: 500;
 }
 
 /* Social Links */
@@ -239,19 +246,43 @@ p {
     margin-top: 10px;
     display: flex;
     justify-content: center;
-    gap: 15px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
 .froll-socials a {
-    background: #ffcc00;
-    color: #000;
-    padding: 8px 12px;
+    background: #007bff;
+    color: white;
+    padding: 8px 14px;
     border-radius: 5px;
     text-decoration: none;
     font-weight: bold;
+    font-size: 14px;
+    transition: background 0.3s ease;
 }
 
 .froll-socials a:hover {
-    background: #ffaa00;
+    background: #0056b3;
+}
+
+/* Responsive Optimization */
+@media (max-width: 768px) {
+    .froll-info {
+        padding: 15px;
+        font-size: 15px;
+    }
+
+    .froll-platforms ul {
+        max-width: 100%;
+    }
+
+    .froll-socials {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .froll-socials a {
+        width: 80%;
+        text-align: center;
+    }
 }
