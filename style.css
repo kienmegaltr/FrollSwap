@@ -182,3 +182,60 @@ p {
         width: 100%;
     }
 }
+
+/* FROLL Info Section */
+.froll-info {
+    text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    background: #1a1a2e;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    line-height: 1.5;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Links in FROLL Section */
+.froll-info a {
+    color: #ffcc00;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.froll-info a:hover {
+    text-decoration: underline;
+}
+
+/* Platforms List */
+.froll-platforms ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.froll-platforms li {
+    margin: 8px 0;
+    font-size: 15px;
+}
+
+/* Social Links */
+.froll-socials {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.froll-socials a {
+    background: #ffcc00;
+    color: #000;
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.froll-socials a:hover {
+    background: #ffaa00;
+}
