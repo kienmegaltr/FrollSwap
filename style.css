@@ -282,3 +282,23 @@ p {
         padding: 6px 0;
     }
 }
+/* Làm hai đoạn liền mạch, không bị tách rời */
+#connect-interface {
+    margin-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Gắn chặt phần mới vào phần cũ */
+#new-content {
+    margin-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    padding-top: 10px;
+}
+
+/* Tạo hiệu ứng liền mạch khi nhìn */
+#connect-interface, #new-content {
+    box-shadow: none; /* Loại bỏ hiệu ứng bóng */
+    border: none; /* Loại bỏ viền */
+}
