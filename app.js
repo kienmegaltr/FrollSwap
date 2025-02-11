@@ -1,13 +1,27 @@
 (function() {
+    function blockDevTools() {
+        const devToolsOpened = /./;
+        devToolsOpened.toString = function() {
+            document.body.innerHTML = "<h1 style='text-align:center; color:red;'>🚫 DevTools Detected! Please close DevTools to access this page. 🚫</h1>";
+        };
+        console.log('%c ', devToolsOpened);
+    }
+
     function detectDevTools() {
-        const widthThreshold = window.outerWidth - window.innerWidth > 160;
-        const heightThreshold = window.outerHeight - window.innerHeight > 160;
-        if (widthThreshold || heightThreshold) {
+        if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
             document.body.innerHTML = "<h1 style='text-align:center; color:red;'>🚫 DevTools Detected! Please close DevTools to access this page. 🚫</h1>";
         }
     }
-    
+
+    // Kích hoạt kiểm tra liên tục
+    setInterval(blockDevTools, 1000);
     window.addEventListener("resize", detectDevTools);
+    window.addEventListener("keydown", function(event) {
+        if (event.keyCode === 123 || (event.ctrlKey && event.shiftKey && event.keyCode === 73)) {
+            event.preventDefault();
+            alert("🚫 DevTools is disabled!");
+        }
+    });
 })();
 
 // Sự kiện chạy khi trang đã tải hoàn tất
