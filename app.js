@@ -1,3 +1,16 @@
+(function() {
+    function detectDevTools() {
+        const widthThreshold = window.outerWidth - window.innerWidth > 160;
+        const heightThreshold = window.outerHeight - window.innerHeight > 160;
+        if (widthThreshold || heightThreshold) {
+            document.body.innerHTML = "<h1 style='text-align:center; color:red;'>🚫 DevTools Detected! Please close DevTools to access this page. 🚫</h1>";
+        }
+    }
+    
+    window.addEventListener("resize", detectDevTools);
+})();
+
+// Sự kiện chạy khi trang đã tải hoàn tất
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const connectWalletButton = document.getElementById('connect-wallet');
