@@ -242,3 +242,43 @@ p {
         font-size: 14px;
     }
 }
+/* Làm đẹp các liên kết trong nội dung */
+#new-content a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    padding: 5px 0;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+/* Hiệu ứng khi di chuột vào link */
+#new-content a:hover {
+    color: #d9534f;
+    transform: scale(1.05);
+    text-decoration: underline;
+}
+
+/* Tạo hiệu ứng sáng khi click */
+#new-content a:active {
+    color: #ff5733;
+    transform: scale(0.95);
+}
+
+/* Căn chỉnh danh sách link trong bài viết */
+.feature-list li {
+    padding: 8px 0;
+    font-size: 16px;
+}
+
+/* Đảm bảo hiển thị đẹp trên điện thoại */
+@media (max-width: 768px) {
+    #new-content a {
+        font-size: 14px;
+    }
+
+    .feature-list li {
+        font-size: 14px;
+        padding: 6px 0;
+    }
+}
