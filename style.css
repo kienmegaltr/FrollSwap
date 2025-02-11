@@ -182,122 +182,63 @@ p {
         width: 100%;
     }
 }
-/* FROLL Info Section */
-.froll-info {
+#new-content {
+    background: rgba(255, 255, 255, 0.8); /* Nền trắng trong suốt */
     max-width: 600px;
-    margin: 20px auto 0;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.8);
+    margin: 20px auto;
     padding: 20px;
     border-radius: 10px;
-    color: #333;
-    font-size: 16px;
-    line-height: 1.5;
-    font-weight: 500;
-}
-
-/* Title Centered */
-.froll-info h2 {
-    text-align: center;
-    font-size: 22px;
-    font-weight: bold;
-    color: #007bff;
-}
-
-/* Subtitle */
-.froll-platforms h3 {
-    text-align: center;
-    font-size: 18px;
-    margin-bottom: 10px;
-    color: #444;
-    font-weight: 600;
-}
-
-/* Remove bullet points from FROLL platforms list */
-.froll-platforms ul {
-    list-style: none; /* Loại bỏ dấu chấm */
-    padding: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: left;
-    margin: 0 auto;
-    max-width: 500px;
 }
 
-/* Spacing between list items */
-.froll-platforms li {
-    margin: 8px 0;
-    font-size: 15px;
-    font-weight: 500;
-}
-
-/* Social Links */
-.froll-socials {
-    margin-top: 10px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.froll-socials a {
-    background: none;
+#new-content h2, #new-content h3 {
     color: #007bff;
-    padding: 8px 14px;
-    border-radius: 5px;
+    text-align: center; /* Căn giữa tiêu đề */
+    margin-bottom: 15px;
+}
+
+#new-content p {
+    color: #444;
+    margin: 10px 0;
+}
+
+.highlight-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: #d9534f;
+    text-align: center; /* Căn giữa dòng highlight */
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    text-align: left; /* Căn trái nội dung */
+}
+
+.feature-list li {
+    padding: 5px 0;
+    font-size: 16px;
+}
+
+.feature-list a {
+    color: #007bff;
     text-decoration: none;
     font-weight: bold;
-    font-size: 14px;
-    transition: background 0.3s ease;
 }
 
-.froll-socials a:hover {
-    background: #007bff;
-    color: white;
+.feature-list a:hover {
+    text-decoration: underline;
 }
 
-/* Responsive */
+/* Đảm bảo hiển thị đẹp trên điện thoại */
 @media (max-width: 768px) {
-    .froll-info {
+    #new-content {
+        max-width: 90%;
         padding: 15px;
-        font-size: 15px;
     }
-
-    .froll-platforms ul {
-        max-width: 100%;
+    
+    .feature-list li {
+        font-size: 14px;
     }
-
-    .froll-socials {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .froll-socials a {
-        width: 80%;
-        text-align: center;
-    }
-}
-/* Style for platform links (LotteryFroll, LottoFroll, etc.) */
-.froll-platforms a {
-    color: #007bff;
-    font-weight: bold;
-    text-decoration: none;
-    transition: color 0.3s ease, text-shadow 0.3s ease;
-}
-
-.froll-platforms a:hover {
-    color: #0056b3;
-    text-shadow: 0px 0px 8px rgba(0, 123, 255, 0.6);
-    text-decoration: underline;
-}
-/* Style for Smart Contract link */
-.froll-info a {
-    color: #007bff;
-    font-weight: bold;
-    text-decoration: none;
-    transition: color 0.3s ease, text-shadow 0.3s ease;
-}
-
-.froll-info a:hover {
-    color: #0056b3;
-    text-shadow: 0px 0px 8px rgba(0, 123, 255, 0.6);
-    text-decoration: underline;
 }
