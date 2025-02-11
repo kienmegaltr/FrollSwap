@@ -271,3 +271,50 @@ p {
         padding: 6px 0;
     }
 }
+/* Định dạng danh sách các nền tảng */
+.feature-list {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    padding: 10px 0;
+    font-size: 16px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+/* Định dạng link */
+.feature-list a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    padding: 8px 0;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+/* Hiệu ứng hover khi di chuột vào link */
+.feature-list a:hover {
+    color: #d9534f;
+    transform: scale(1.05);
+    text-decoration: underline;
+}
+
+/* Tạo hiệu ứng nổi bật cho danh sách */
+.feature-list li:hover {
+    background: rgba(0, 123, 255, 0.1); /* Nền xanh nhạt khi hover */
+    transform: translateX(5px);
+    border-radius: 5px;
+}
+
+/* Đảm bảo hiển thị tốt trên mobile */
+@media (max-width: 768px) {
+    .feature-list li {
+        font-size: 14px;
+        padding: 6px 0;
+    }
+
+    .feature-list a {
+        font-size: 14px;
+    }
+}
