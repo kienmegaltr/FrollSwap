@@ -255,6 +255,29 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('connect-interface').style.display = 'block';
     }
 
+   // Hàm cập nhật giá FROLL theo USD
+async function updateFrollPrice() {
+    try {
+        // Gọi API Binance lấy giá VIC/USDT
+        const response = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
+        const data = await response.json();
+        const vicPrice = parseFloat(data.price); // Giá VIC theo USD
+
+        // Tính giá FROLL theo USD (FROLL = 100 VIC)
+        const frollPrice = (vicPrice * 100).toFixed(2); 
+
+        // Cập nhật UI
+        document.getElementById("froll-price").textContent = `1 FROLL = ${frollPrice} USD`;
+    } catch (error) {
+        console.error("Lỗi khi lấy giá VIC:", error);
+        document.getElementById("froll-price").textContent = "Price unavailable";
+    }
+}
+
+// Cập nhật giá FROLL mỗi 10 giây
+setInterval(updateFrollPrice, 10000);
+updateFrollPrice(); // Gọi ngay khi tải trang
+
     // Initialize Interface
     showConnectInterface();
 });
