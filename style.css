@@ -182,3 +182,91 @@ p {
         width: 100%;
     }
 }
+/* Tạo sự liền mạch giữa phần mới và phần cũ */
+#connect-interface {
+    margin-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Gắn chặt phần mới vào phần cũ */
+#new-content {
+    margin-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    padding-top: 10px;
+    background: rgba(255, 255, 255, 0.85); /* Nền trắng hơi trong suốt */
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+/* Slogan bốc lửa */
+.slogan {
+    font-size: 24px;
+    font-weight: bold;
+    background: linear-gradient(45deg, #ff4500, #e63946);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 3px 3px 10px rgba(255, 69, 0, 0.8);
+    margin-bottom: 15px;
+    animation: fireGlow 1.5s infinite alternate ease-in-out;
+}
+
+/* Hiệu ứng sáng rực lửa */
+@keyframes fireGlow {
+    from {
+        text-shadow: 3px 3px 15px rgba(255, 69, 0, 0.9);
+    }
+    to {
+        text-shadow: 5px 5px 20px rgba(255, 69, 0, 1);
+    }
+}
+
+/* Danh sách đẹp hơn */
+.feature-list {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+}
+
+.feature-list li {
+    padding: 8px 0;
+    font-size: 16px;
+}
+
+/* Làm đẹp link */
+#new-content a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    padding: 5px 0;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+/* Hiệu ứng hover cho link */
+#new-content a:hover {
+    color: #d9534f;
+    transform: scale(1.05);
+    text-decoration: underline;
+}
+
+/* Đảm bảo phần mới hiển thị đẹp trên mobile */
+@media (max-width: 768px) {
+    #new-content {
+        max-width: 90%;
+        padding: 15px;
+    }
+
+    .feature-list li {
+        font-size: 14px;
+        padding: 6px 0;
+    }
+}
