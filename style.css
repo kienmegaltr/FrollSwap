@@ -182,7 +182,16 @@ p {
         width: 100%;
     }
 }
-/* Tạo sự liền mạch giữa phần mới và phần cũ */
+/* Ẩn phần giới thiệu khi bấm Connect Wallet */
+#connect-interface:has(+ #swap-interface[style*="block"]) {
+    display: none;
+}
+
+#new-content:has(+ #swap-interface[style*="block"]) {
+    display: none;
+}
+
+/* Làm hai đoạn liền mạch, không bị tách rời */
 #connect-interface {
     margin-bottom: 0;
     border-bottom-left-radius: 0;
