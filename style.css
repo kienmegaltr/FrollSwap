@@ -302,25 +302,27 @@ p {
     box-shadow: none; /* Loại bỏ hiệu ứng bóng */
     border: none; /* Loại bỏ viền */
 }
-/* Slogan rực lửa */
+/* Slogan bốc lửa */
 .slogan {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: bold;
-    color: #e63946; /* Đỏ rực */
+    background: linear-gradient(45deg, #ff4500, #e63946); /* Gradient từ cam lửa đến đỏ rực */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; /* Tạo hiệu ứng chữ lửa */
     text-align: center;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    text-shadow: 2px 2px 10px rgba(230, 57, 70, 0.7); /* Hiệu ứng lửa mờ */
+    letter-spacing: 2px;
+    text-shadow: 3px 3px 10px rgba(255, 69, 0, 0.8);
     margin-bottom: 15px;
-    animation: fireGlow 1.5s infinite alternate ease-in-out; /* Hiệu ứng rực sáng */
+    animation: fireGlow 1.5s infinite alternate ease-in-out;
 }
 
 /* Hiệu ứng sáng rực lửa */
 @keyframes fireGlow {
     from {
-        text-shadow: 2px 2px 10px rgba(230, 57, 70, 0.7);
+        text-shadow: 3px 3px 15px rgba(255, 69, 0, 0.9);
     }
     to {
-        text-shadow: 3px 3px 15px rgba(230, 57, 70, 1);
+        text-shadow: 5px 5px 20px rgba(255, 69, 0, 1);
     }
 }
