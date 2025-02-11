@@ -302,3 +302,25 @@ p {
     box-shadow: none; /* Loại bỏ hiệu ứng bóng */
     border: none; /* Loại bỏ viền */
 }
+/* Slogan rực lửa */
+.slogan {
+    font-size: 22px;
+    font-weight: bold;
+    color: #e63946; /* Đỏ rực */
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 10px rgba(230, 57, 70, 0.7); /* Hiệu ứng lửa mờ */
+    margin-bottom: 15px;
+    animation: fireGlow 1.5s infinite alternate ease-in-out; /* Hiệu ứng rực sáng */
+}
+
+/* Hiệu ứng sáng rực lửa */
+@keyframes fireGlow {
+    from {
+        text-shadow: 2px 2px 10px rgba(230, 57, 70, 0.7);
+    }
+    to {
+        text-shadow: 3px 3px 15px rgba(230, 57, 70, 1);
+    }
+}
