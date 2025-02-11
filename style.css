@@ -341,6 +341,15 @@ p {
     transform: scale(1.05);
     text-decoration: underline;
 }
+/* Giá FROLL trên thanh điều hướng */
+.froll-price {
+    font-weight: bold;
+    color: #ffffff;
+    font-size: 18px;
+    margin-left: 15px; /* Tạo khoảng cách với logo */
+    text-align: center;
+    white-space: nowrap;
+}
 
 /* Đảm bảo hiển thị tốt trên mobile */
 @media (max-width: 768px) {
