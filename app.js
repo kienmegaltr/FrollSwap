@@ -13,15 +13,32 @@
         }
     }
 
-    // Kích hoạt kiểm tra liên tục
-    setInterval(blockDevTools, 1000);
-    window.addEventListener("resize", detectDevTools);
+    // Kiểm tra DevTools bằng cách đo kích thước cửa sổ
+    setInterval(() => {
+        if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
+            document.body.innerHTML = "<h1 style='text-align:center; color:red;'>🚫 DevTools Detected! Please close DevTools to access this page. 🚫</h1>";
+        }
+    }, 500);
+
+    // Ngăn người dùng nhấn F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
     window.addEventListener("keydown", function(event) {
-        if (event.keyCode === 123 || (event.ctrlKey && event.shiftKey && event.keyCode === 73)) {
+        if (event.keyCode === 123 || 
+            (event.ctrlKey && event.shiftKey && (event.keyCode === 73 || event.keyCode === 74)) || 
+            (event.ctrlKey && event.keyCode === 85)) {
             event.preventDefault();
             alert("🚫 DevTools is disabled!");
         }
     });
+
+    // Chặn mở console bằng cách kiểm tra thời gian phản hồi của "debugger;"
+    setInterval(function() {
+        let before = performance.now();
+        debugger;
+        let after = performance.now();
+        if (after - before > 50) {
+            document.body.innerHTML = "<h1 style='text-align:center; color:red;'>🚫 DevTools Detected! Please close DevTools to access this page. 🚫</h1>";
+        }
+    }, 1000);
 })();
 
 // Sự kiện chạy khi trang đã tải hoàn tất
