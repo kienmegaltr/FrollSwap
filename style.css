@@ -296,11 +296,11 @@ p {
     cursor: pointer;
     color: #007bff;
     font-weight: bold;
-    text-decoration: underline;
+    text-decoration: none; /* Bỏ gạch chân mặc định */
     transition: color 0.3s ease;
 }
 
 .copyable:hover {
     color: #d9534f;
-    text-decoration: none;
+    text-decoration: underline; /* Chỉ hiển thị gạch chân khi hover */
 }
