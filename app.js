@@ -325,3 +325,11 @@ updateFrollPrice(); // Gọi ngay khi tải trang
     // Initialize Interface
     showConnectInterface();
 });
+function copyToClipboard() {
+    const contractAddress = document.getElementById("contract-address").textContent;
+    navigator.clipboard.writeText(contractAddress).then(() => {
+        alert("✅ Copied to clipboard: " + contractAddress);
+    }).catch(err => {
+        console.error("Copy failed!", err);
+    });
+}
