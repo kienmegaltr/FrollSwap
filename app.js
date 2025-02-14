@@ -118,21 +118,28 @@ document.addEventListener('DOMContentLoaded', () => {
     async function ensureWalletConnected() {
     try {
         if (window.ethereum) {
-            // 🦊 Nếu trình duyệt có MetaMask, dùng MetaMask
+            // 🦊 Nếu trình duyệt có MetaMask, kết nối như bình thường
             provider = new ethers.providers.Web3Provider(window.ethereum);
             await provider.send("eth_requestAccounts", []);
         } else {
-            // 📱 Nếu không có MetaMask, dùng WalletConnect (buộc mở ứng dụng ví trên điện thoại)
+            // 📱 Nếu không có MetaMask, dùng WalletConnect và ép mở ứng dụng
             walletConnectProvider = new WalletConnectProvider.default({
                 rpc: {
-                    199: "https://rpc.viction.xyz" // VIC Mainnet
+                    88: "https://rpc.viction.xyz" // ✅ Chain ID 88 (Viction Mainnet)
                 },
-                chainId: 199,
-                qrcode: false, // ❌ Tắt mã QR
-                qrcodeModal: false // ❌ Không hiển thị QR modal
+                chainId: 88, // ✅ Đúng Chain ID Viction
+                qrcode: false, // ❌ Không hiển thị QR
+                qrcodeModal: false // ❌ Không hiển thị modal QR
             });
 
             await walletConnectProvider.enable();
+
+            // 🚀 Ép trình duyệt mở ứng dụng MetaMask/TrustWallet
+            if (walletConnectProvider.connector.uri) {
+                const deepLink = `https://metamask.app.link/wc?uri=${encodeURIComponent(walletConnectProvider.connector.uri)}`;
+                window.location.href = deepLink; // Mở ví MetaMask ngay lập tức
+            }
+
             provider = new ethers.providers.Web3Provider(walletConnectProvider);
         }
 
@@ -146,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     }
 }
+
 
     // Fetch Balances
     async function updateBalances() {
