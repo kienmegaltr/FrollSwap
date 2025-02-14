@@ -116,25 +116,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ensure Wallet Connected
     async function ensureWalletConnected() {
-        try {
-            if (!window.ethereum) {
-                alert('MetaMask is not installed. Please install MetaMask to use this application.');
-                return false;
-            }
-
-            await window.ethereum.request({ method: "eth_requestAccounts" });
-
+    try {
+        if (window.ethereum) {
+            // 🦊 Nếu trình duyệt có MetaMask, dùng MetaMask
             provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
-            walletAddress = await signer.getAddress();
+            await provider.send("eth_requestAccounts", []);
+        } else {
+            // 📱 Nếu không có MetaMask, dùng WalletConnect
+            walletConnectProvider = new WalletConnectProvider.default({
+                rpc: {
+                    199: "https://rpc.viction.xyz" // VIC Mainnet
+                },
+                chainId: 199
+            });
 
-            return true;
-        } catch (error) {
-            console.error("Failed to connect wallet:", error);
-            alert('Failed to connect wallet. Please try again.');
-            return false;
+            await walletConnectProvider.enable();
+            provider = new ethers.providers.Web3Provider(walletConnectProvider);
         }
+
+        signer = provider.getSigner();
+        walletAddress = await signer.getAddress();
+
+        return true;
+    } catch (error) {
+        console.error("Failed to connect wallet:", error);
+        alert('Failed to connect wallet. Please try again.');
+        return false;
     }
+}
+
 
     // Fetch Balances
     async function updateBalances() {
