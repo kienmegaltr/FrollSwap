@@ -118,17 +118,18 @@ document.addEventListener('DOMContentLoaded', () => {
     async function ensureWalletConnected() {
     try {
         if (window.ethereum) {
-            // 🦊 Nếu trình duyệt có MetaMask, kết nối như bình thường
+            // 🦊 Nếu trình duyệt có MetaMask, dùng MetaMask
             provider = new ethers.providers.Web3Provider(window.ethereum);
             await provider.send("eth_requestAccounts", []);
         } else {
-            // 📱 Nếu không có MetaMask, sử dụng WalletConnect (tắt mã QR trên di động)
+            // 📱 Nếu không có MetaMask, dùng WalletConnect (buộc mở ứng dụng ví trên điện thoại)
             walletConnectProvider = new WalletConnectProvider.default({
                 rpc: {
                     199: "https://rpc.viction.xyz" // VIC Mainnet
                 },
                 chainId: 199,
-                qrcode: window.innerWidth > 768 // Nếu trên điện thoại, ẩn QR Code
+                qrcode: false, // ❌ Tắt mã QR
+                qrcodeModal: false // ❌ Không hiển thị QR modal
             });
 
             await walletConnectProvider.enable();
@@ -145,8 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     }
 }
-
-
 
     // Fetch Balances
     async function updateBalances() {
