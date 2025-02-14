@@ -262,21 +262,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Connect Wallet
     connectWalletButton.addEventListener('click', async () => {
-        const connected = await ensureWalletConnected();
-        if (!connected) return;
+    connectWalletButton.textContent = "Connecting...";
+    connectWalletButton.disabled = true;
 
-        try {
-            frollSwapContract = new ethers.Contract(frollSwapAddress, frollSwapABI, signer);
-            frollTokenContract = new ethers.Contract(frollTokenAddress, frollABI, signer);
+    const connected = await ensureWalletConnected();
+    if (!connected) {
+        connectWalletButton.textContent = "Connect Wallet";
+        connectWalletButton.disabled = false;
+        return;
+    }
 
-            walletAddressDisplay.textContent = walletAddress;
-            await updateBalances();
-            showSwapInterface();
-        } catch (error) {
-            console.error('Failed to initialize wallet:', error);
-            alert(`Failed to initialize wallet: ${error.message}`);
-        }
-    });
+    try {
+        frollSwapContract = new ethers.Contract(frollSwapAddress, frollSwapABI, signer);
+        frollTokenContract = new ethers.Contract(frollTokenAddress, frollABI, signer);
+
+        walletAddressDisplay.textContent = walletAddress;
+        await updateBalances();
+        showSwapInterface();
+    } catch (error) {
+        console.error('Failed to initialize wallet:', error);
+        alert(`Failed to initialize wallet: ${error.message}`);
+    }
+
+    connectWalletButton.textContent = "Connect Wallet";
+    connectWalletButton.disabled = false;
+});
+
 
     // Handle Disconnect Wallet button click
     disconnectWalletButton.addEventListener('click', async () => {
