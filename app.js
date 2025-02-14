@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Blockchain Config
     let provider, signer;
+    let walletConnectProvider = null;
     const frollSwapAddress = "0x9197BF0813e0727df4555E8cb43a0977F4a3A068";
     const frollTokenAddress = "0xB4d562A8f811CE7F134a1982992Bd153902290BC";
 
