@@ -135,5 +135,28 @@
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <!-- Include App.js -->
     <script src="app.js"></script>
+    <!-- 📌 Cập nhật giá VIN theo USD -->
+    <script>
+        async function updateVinPrice() {
+            try {
+                const response = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
+                const data = await response.json();
+                const vicPrice = parseFloat(data.price);
+
+                // Tính giá VIN theo USD (1 VIN = 100 VIC)
+                const vinPrice = (vicPrice * 100).toFixed(2);
+
+                // Hiển thị trên thanh điều hướng
+                document.getElementById("vin-price-display").textContent = `1 VIN = ${vinPrice} USD`;
+            } catch (error) {
+                console.error("Lỗi khi lấy giá VIC:", error);
+                document.getElementById("vin-price-display").textContent = "Price unavailable";
+            }
+        }
+
+        // Cập nhật giá VIN mỗi 10 giây
+        setInterval(updateVinPrice, 10000);
+        updateVinPrice();
+    </script>
 </body>
 </html>
