@@ -45,8 +45,6 @@
     }
 })();
 
-
-// Sự kiện chạy khi trang đã tải hoàn tất
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const connectWalletButton = document.getElementById('connect-wallet');
@@ -66,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Blockchain Config
     let provider, signer;
-    let walletConnectProvider = null;
     const frollSwapAddress = "0x9197BF0813e0727df4555E8cb43a0977F4a3A068";
     const frollTokenAddress = "0xB4d562A8f811CE7F134a1982992Bd153902290BC";
 
@@ -121,44 +118,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ensure Wallet Connected
     async function ensureWalletConnected() {
-    try {
-        if (window.ethereum) {
-            // 🦊 Nếu trình duyệt có MetaMask, kết nối như bình thường
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            await provider.send("eth_requestAccounts", []);
-        } else {
-            // 📱 Nếu không có MetaMask, dùng WalletConnect và ép mở ứng dụng
-            walletConnectProvider = new WalletConnectProvider.default({
-                rpc: {
-                    88: "https://rpc.viction.xyz" // ✅ Chain ID 88 (Viction Mainnet)
-                },
-                chainId: 88, // ✅ Đúng Chain ID Viction
-                qrcode: false, // ❌ Không hiển thị QR
-                qrcodeModal: false // ❌ Không hiển thị modal QR
-            });
-
-            await walletConnectProvider.enable();
-
-            // 🚀 Ép trình duyệt mở ứng dụng MetaMask/TrustWallet
-            if (walletConnectProvider.connector.uri) {
-                const deepLink = `https://metamask.app.link/wc?uri=${encodeURIComponent(walletConnectProvider.connector.uri)}`;
-                window.location.href = deepLink; // Mở ví MetaMask ngay lập tức
+        try {
+            if (!window.ethereum) {
+                alert('MetaMask is not installed. Please install MetaMask to use this application.');
+                return false;
             }
 
-            provider = new ethers.providers.Web3Provider(walletConnectProvider);
+            await window.ethereum.request({ method: "eth_requestAccounts" });
+
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
+            walletAddress = await signer.getAddress();
+
+            return true;
+        } catch (error) {
+            console.error("Failed to connect wallet:", error);
+            alert('Failed to connect wallet. Please try again.');
+            return false;
         }
-
-        signer = provider.getSigner();
-        walletAddress = await signer.getAddress();
-
-        return true;
-    } catch (error) {
-        console.error("Failed to connect wallet:", error);
-        alert('Failed to connect wallet. Please try again.');
-        return false;
     }
-}
-
 
     // Fetch Balances
     async function updateBalances() {
@@ -276,59 +254,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Connect Wallet
     connectWalletButton.addEventListener('click', async () => {
-    connectWalletButton.textContent = "Connecting...";
-    connectWalletButton.disabled = true;
+        const connected = await ensureWalletConnected();
+        if (!connected) return;
 
-    const connected = await ensureWalletConnected();
-    if (!connected) {
-        connectWalletButton.textContent = "Connect Wallet";
-        connectWalletButton.disabled = false;
-        return;
-    }
+        try {
+            frollSwapContract = new ethers.Contract(frollSwapAddress, frollSwapABI, signer);
+            frollTokenContract = new ethers.Contract(frollTokenAddress, frollABI, signer);
 
-    try {
-        frollSwapContract = new ethers.Contract(frollSwapAddress, frollSwapABI, signer);
-        frollTokenContract = new ethers.Contract(frollTokenAddress, frollABI, signer);
-
-        walletAddressDisplay.textContent = walletAddress;
-        await updateBalances();
-        showSwapInterface();
-    } catch (error) {
-        console.error('Failed to initialize wallet:', error);
-        alert(`Failed to initialize wallet: ${error.message}`);
-    }
-
-    connectWalletButton.textContent = "Connect Wallet";
-    connectWalletButton.disabled = false;
-});
-
+            walletAddressDisplay.textContent = walletAddress;
+            await updateBalances();
+            showSwapInterface();
+        } catch (error) {
+            console.error('Failed to initialize wallet:', error);
+            alert(`Failed to initialize wallet: ${error.message}`);
+        }
+    });
 
     // Handle Disconnect Wallet button click
     disconnectWalletButton.addEventListener('click', async () => {
-    try {
-        if (walletConnectProvider) {
-            await walletConnectProvider.disconnect();
-            walletConnectProvider = null;
+        try {
+            // Reset wallet-related variables
+            walletAddress = null;
+            balances = { VIC: 0, FROLL: 0 };
+            frollSwapContract = null;
+            frollTokenContract = null;
+
+            // Update UI
+            walletAddressDisplay.textContent = '';
+            clearInputs();
+            showConnectInterface();
+
+            alert('Wallet disconnected successfully.');
+        } catch (error) {
+            console.error('Error disconnecting wallet:', error);
+            alert('Failed to disconnect wallet. Please try again.');
         }
-
-        // Reset wallet-related variables
-        walletAddress = null;
-        balances = { VIC: 0, FROLL: 0 };
-        frollSwapContract = null;
-        frollTokenContract = null;
-
-        // Update UI
-        walletAddressDisplay.textContent = '';
-        clearInputs();
-        showConnectInterface();
-
-        alert('Wallet disconnected successfully.');
-    } catch (error) {
-        console.error('Error disconnecting wallet:', error);
-        alert('Failed to disconnect wallet. Please try again.');
-    }
-});
-
+    });
 
     // Show/Hide Interfaces
     function showSwapInterface() {
@@ -341,37 +302,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('connect-interface').style.display = 'block';
     }
 
-   // Hàm cập nhật giá FROLL theo USD
-async function updateFrollPrice() {
-    try {
-        // Gọi API Binance lấy giá VIC/USDT
-        const response = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
-        const data = await response.json();
-        const vicPrice = parseFloat(data.price); // Giá VIC theo USD
-
-        // Tính giá FROLL theo USD (FROLL = 100 VIC)
-        const frollPrice = (vicPrice * 100).toFixed(2); 
-
-        // Cập nhật UI
-        document.getElementById("froll-price").textContent = `1 FROLL = ${frollPrice} USD`;
-    } catch (error) {
-        console.error("Lỗi khi lấy giá VIC:", error);
-        document.getElementById("froll-price").textContent = "Price unavailable";
-    }
-}
-
-// Cập nhật giá FROLL mỗi 10 giây
-setInterval(updateFrollPrice, 10000);
-updateFrollPrice(); // Gọi ngay khi tải trang
-
     // Initialize Interface
     showConnectInterface();
 });
-function copyToClipboard() {
-    const contractAddress = document.getElementById("contract-address").textContent;
-    navigator.clipboard.writeText(contractAddress).then(() => {
-        alert("✅ Copied to clipboard: " + contractAddress);
-    }).catch(err => {
-        console.error("Copy failed!", err);
-    });
-}
