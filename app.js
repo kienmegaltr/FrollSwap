@@ -1,3 +1,47 @@
+(function() {
+    function blockDevTools() {
+        const devToolsOpened = /./;
+        devToolsOpened.toString = function() {
+            document.body.innerHTML = "<h1 style='text-align:center; color:red;'>🚫 DevTools Detected! Please close DevTools to access this page. 🚫</h1>";
+        };
+        console.log('%c ', devToolsOpened);
+    }
+
+    function detectDevTools() {
+        if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
+            document.body.innerHTML = "<h1 style='text-align:center; color:red;'>🚫 DevTools Detected! Please close DevTools to access this page. 🚫</h1>";
+        }
+    }
+
+    // Kiểm tra DevTools bằng cách đo kích thước cửa sổ
+    setInterval(() => {
+        if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
+            document.body.innerHTML = "<h1 style='text-align:center; color:red;'>🚫 DevTools Detected! Please close DevTools to access this page. 🚫</h1>";
+        }
+    }, 500);
+
+    // Ngăn người dùng nhấn F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+    window.addEventListener("keydown", function(event) {
+        if (event.keyCode === 123 || 
+            (event.ctrlKey && event.shiftKey && (event.keyCode === 73 || event.keyCode === 74)) || 
+            (event.ctrlKey && event.keyCode === 85)) {
+            event.preventDefault();
+            alert("🚫 DevTools is disabled!");
+        }
+    });
+
+    // Chặn mở console bằng cách kiểm tra thời gian phản hồi của "debugger;"
+    setInterval(function() {
+        let before = performance.now();
+        debugger;
+        let after = performance.now();
+        if (after - before > 50) {
+            document.body.innerHTML = "<h1 style='text-align:center; color:red;'>🚫 DevTools Detected! Please close DevTools to access this page. 🚫</h1>";
+        }
+    }, 1000);
+})();
+
+// Sự kiện chạy khi trang đã tải hoàn tất
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const connectWalletButton = document.getElementById('connect-wallet');
@@ -255,6 +299,37 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('connect-interface').style.display = 'block';
     }
 
+   // Hàm cập nhật giá FROLL theo USD
+async function updateFrollPrice() {
+    try {
+        // Gọi API Binance lấy giá VIC/USDT
+        const response = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
+        const data = await response.json();
+        const vicPrice = parseFloat(data.price); // Giá VIC theo USD
+
+        // Tính giá FROLL theo USD (FROLL = 100 VIC)
+        const frollPrice = (vicPrice * 100).toFixed(2); 
+
+        // Cập nhật UI
+        document.getElementById("froll-price").textContent = `1 FROLL = ${frollPrice} USD`;
+    } catch (error) {
+        console.error("Lỗi khi lấy giá VIC:", error);
+        document.getElementById("froll-price").textContent = "Price unavailable";
+    }
+}
+
+// Cập nhật giá FROLL mỗi 10 giây
+setInterval(updateFrollPrice, 10000);
+updateFrollPrice(); // Gọi ngay khi tải trang
+
     // Initialize Interface
     showConnectInterface();
 });
+function copyToClipboard() {
+    const contractAddress = document.getElementById("contract-address").textContent;
+    navigator.clipboard.writeText(contractAddress).then(() => {
+        alert("✅ Copied to clipboard: " + contractAddress);
+    }).catch(err => {
+        console.error("Copy failed!", err);
+    });
+}
